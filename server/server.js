@@ -14,6 +14,9 @@ const noteRoutes = require('./routes/note.routes');
 // Initialize express app
 const app = express();
 
+// Trust proxy - Required for Render and other proxy services
+app.set('trust proxy', 1);
+
 // Connect to MongoDB
 connectDB();
 
