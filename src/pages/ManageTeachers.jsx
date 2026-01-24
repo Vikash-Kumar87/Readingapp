@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Plus, Edit, Trash2, User } from 'lucide-react';
 import AdminLayout from '../layouts/AdminLayout';
 import Modal from '../components/admin/Modal';
+import API_BASE_URL from '../config/api';
 
 /**
  * Manage Teachers Page
@@ -29,7 +30,7 @@ function ManageTeachers() {
 
   const fetchTeachers = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/teachers', {
+      const response = await fetch(`${API_BASE_URL}/api/teachers`, {
         credentials: 'include'
       });
       const data = await response.json();
@@ -63,7 +64,7 @@ function ManageTeachers() {
       notesCount: teacher.notesCount,
       description: teacher.description || '',
       photo: null,
-      photoPreview: teacher.profileImage ? `http://localhost:5000${teacher.profileImage}` : null
+      photoPreview: teacher.profileImage ? `${API_BASE_URL}${teacher.profileImage}` : null
     });
     setIsModalOpen(true);
   };
@@ -73,9 +74,8 @@ function ManageTeachers() {
     
     try {
       const url = editingTeacher 
-        ? `http://localhost:5000/api/admin/teachers/${editingTeacher._id}`
-        : 'http://localhost:5000/api/admin/teachers';
-      
+        ? `${API_BASE_URL}/api/admin/teachers/${editingTeacher._id}`
+        : `${API_BASE_URL}/api/admin/teachers`;
       const method = editingTeacher ? 'PUT' : 'POST';
       
       // Use FormData for file upload
@@ -111,7 +111,7 @@ function ManageTeachers() {
   const handleDelete = async (teacherId) => {
     if (window.confirm('Are you sure you want to delete this teacher?')) {
       try {
-        const response = await fetch(`http://localhost:5000/api/admin/teachers/${teacherId}`, {
+        const response = await fetch(`${API_BASE_URL}/api/admin/teachers/${teacherId}`, {
           method: 'DELETE',
           credentials: 'include'
         });
@@ -176,7 +176,7 @@ function ManageTeachers() {
                 <div className="flex justify-center mb-4">
                   {teacher.profileImage ? (
                     <img
-                      src={`http://localhost:5000${teacher.profileImage}`}
+                      src={`${API_BASE_URL}${teacher.profileImage}`}
                       alt={teacher.name}
                       className="w-20 h-20 rounded-full object-cover shadow-lg border-2 border-white"
                     />

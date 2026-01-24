@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { BookOpen, User } from 'lucide-react';
+import API_BASE_URL from '../config/api';
 
 /**
  * Color schemes for different teacher cards
@@ -62,7 +63,7 @@ function TeacherCard({ teacher }) {
           >
             {teacher.profileImage ? (
               <img
-                src={`http://localhost:5000${teacher.profileImage}`}
+                src={`${API_BASE_URL}${teacher.profileImage}`}
                 alt={teacher.name}
                 className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-glow"
               />

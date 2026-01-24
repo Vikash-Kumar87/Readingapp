@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Users, GraduationCap, FileText, TrendingUp } from 'lucide-react';
 import StatsCard from '../components/admin/StatsCard';
 import AdminLayout from '../layouts/AdminLayout';
+import API_BASE_URL from '../config/api';
 
 /**
  * Admin Dashboard Overview Page
@@ -29,9 +30,9 @@ function AdminDashboard() {
       
       // Fetch all data in parallel
       const [usersRes, teachersRes, notesRes] = await Promise.all([
-        fetch('http://localhost:5000/api/admin/users', { credentials: 'include' }),
-        fetch('http://localhost:5000/api/teachers', { credentials: 'include' }),
-        fetch('http://localhost:5000/api/notes', { credentials: 'include' })
+        fetch(`${API_BASE_URL}/api/admin/users`, { credentials: 'include' }),
+        fetch(`${API_BASE_URL}/api/teachers`, { credentials: 'include' }),
+        fetch(`${API_BASE_URL}/api/notes`, { credentials: 'include' })
       ]);
 
       const usersData = await usersRes.json();

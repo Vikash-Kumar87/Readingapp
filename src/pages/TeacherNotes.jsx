@@ -12,6 +12,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { containerVariants, itemVariants } from '../animations/variants';
+import API_BASE_URL from '../config/api';
 
 /**
  * TeacherNotes Page Component
@@ -35,7 +36,7 @@ function TeacherNotes() {
   const fetchTeacherAndNotes = async () => {
     try {
       // Fetch teacher details
-      const teacherResponse = await fetch(`http://localhost:5000/api/teachers/${id}`, {
+      const teacherResponse = await fetch(`${API_BASE_URL}/api/teachers/${id}`, {
         credentials: 'include'
       });
       const teacherData = await teacherResponse.json();
@@ -49,7 +50,7 @@ function TeacherNotes() {
       setTeacher(teacherData.data);
 
       // Fetch notes for this teacher
-      const notesResponse = await fetch(`http://localhost:5000/api/notes/teacher/${id}`, {
+      const notesResponse = await fetch(`${API_BASE_URL}/api/notes/teacher/${id}`, {
         credentials: 'include'
       });
       const notesData = await notesResponse.json();
@@ -243,7 +244,7 @@ function TeacherNotes() {
                     // PDF Viewer - Responsive
                     <div className="relative w-full bg-white" style={{ height: '600px' }}>
                       <iframe
-                        src={`http://localhost:5000${selectedNote.fileUrl}#toolbar=0&navpanes=0&scrollbar=1&view=FitH`}
+                        src={`${API_BASE_URL}${selectedNote.fileUrl}#toolbar=0&navpanes=0&scrollbar=1&view=FitH`}
                         className="w-full h-full border-0 bg-white"
                         title="Note Preview"
                         style={{ display: 'block' }}
@@ -253,7 +254,7 @@ function TeacherNotes() {
                     // Image Viewer - Responsive
                     <div className="bg-white p-4 min-h-[500px]">
                       <img
-                        src={`http://localhost:5000${selectedNote.fileUrl}`}
+                        src={`${API_BASE_URL}${selectedNote.fileUrl}`}
                         alt={selectedNote.title}
                         className="w-full h-auto max-w-full mx-auto rounded-xl shadow-2xl"
                         style={{ display: 'block' }}
@@ -317,7 +318,7 @@ function TeacherNotes() {
                 <div className="absolute -inset-1 bg-gradient-to-r from-purple-500 via-pink-500 to-rose-500 rounded-full blur opacity-40 group-hover:opacity-60 transition-opacity"></div>
                 {teacher.profileImage ? (
                   <img
-                    src={`http://localhost:5000${teacher.profileImage}`}
+                    src={`${API_BASE_URL}${teacher.profileImage}`}
                     alt={teacher.name}
                     className="relative w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full object-cover border-4 border-white shadow-2xl ring-4 ring-purple-200 transform transition-transform"
                     style={{ transform: 'perspective(1000px) rotateY(-5deg)' }}

@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Search } from 'lucide-react';
 import TeacherCard from '../components/TeacherCard';
 import { containerVariants, itemVariants } from '../animations/variants';
+import API_BASE_URL from '../config/api';
 
 /**
  * Home Page Component
@@ -21,7 +22,7 @@ function Home() {
 
   const fetchTeachers = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/teachers', {
+      const response = await fetch(`${API_BASE_URL}/api/teachers`, {
         credentials: 'include'
       });
       const data = await response.json();

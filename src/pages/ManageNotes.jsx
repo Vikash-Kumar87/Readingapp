@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Upload, File, Trash2, Download, Eye, Image as ImageIcon } from 'lucide-react';
 import AdminLayout from '../layouts/AdminLayout';
+import API_BASE_URL from '../config/api';
 
 /**
  * Manage Notes Page
@@ -24,7 +25,7 @@ function ManageNotes() {
   const fetchData = async () => {
     try {
       // Fetch teachers
-      const teachersRes = await fetch('http://localhost:5000/api/teachers', {
+      const teachersRes = await fetch(`${API_BASE_URL}/api/teachers`, {
         credentials: 'include'
       });
       const teachersData = await teachersRes.json();
@@ -33,7 +34,7 @@ function ManageNotes() {
       }
 
       // Fetch all notes
-      const notesRes = await fetch('http://localhost:5000/api/notes', {
+      const notesRes = await fetch(`${API_BASE_URL}/api/notes`, {
         credentials: 'include'
       });
       const notesData = await notesRes.json();
@@ -96,7 +97,7 @@ function ManageNotes() {
         formData.append('files', file);
       });
 
-      const response = await fetch('http://localhost:5000/api/admin/notes', {
+      const response = await fetch(`${API_BASE_URL}/api/admin/notes`, {
         method: 'POST',
         credentials: 'include',
         body: formData
@@ -124,7 +125,7 @@ function ManageNotes() {
   const handleDelete = async (noteId) => {
     if (window.confirm('Are you sure you want to delete this note?')) {
       try {
-        const response = await fetch(`http://localhost:5000/api/admin/notes/${noteId}`, {
+        const response = await fetch(`${API_BASE_URL}/api/admin/notes/${noteId}`, {
           method: 'DELETE',
           credentials: 'include'
         });

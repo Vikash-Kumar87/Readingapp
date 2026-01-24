@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate, Link } from 'react-router-dom';
 import { UserPlus, User, Lock, Mail, Eye, EyeOff } from 'lucide-react';
+import API_BASE_URL from '../config/api';
 
 /**
  * Register Page Component
@@ -47,7 +48,7 @@ function Register() {
     }
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/register', {
+      const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

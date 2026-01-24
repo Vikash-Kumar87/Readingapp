@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import API_BASE_URL from '../config/api';
 
 const Settings = () => {
   const [user, setUser] = useState(null);
@@ -23,7 +24,7 @@ const Settings = () => {
 
   const fetchUserProfile = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/auth/me', {
+      const res = await fetch(`${API_BASE_URL}/api/auth/me`, {
         credentials: 'include'
       });
       const data = await res.json();
@@ -54,7 +55,7 @@ const Settings = () => {
     }
 
     try {
-      const res = await fetch('http://localhost:5000/api/auth/change-password', {
+      const res = await fetch(`${API_BASE_URL}/api/auth/change-password`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -85,7 +86,7 @@ const Settings = () => {
     setMessage({ type: '', text: '' });
 
     try {
-      const res = await fetch('http://localhost:5000/api/auth/change-email', {
+      const res = await fetch(`${API_BASE_URL}/api/auth/change-email`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
