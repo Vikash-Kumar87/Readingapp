@@ -64,15 +64,9 @@ function Register() {
       const data = await response.json();
 
       if (response.ok) {
-        // Store user data in localStorage
-        localStorage.setItem('user', JSON.stringify(data.user));
-        
-        // Redirect based on role
-        if (data.user.isAdmin) {
-          navigate('/admin');
-        } else {
-          navigate('/');
-        }
+        // Registration successful - redirect to login page
+        alert('Registration successful! Please login with your credentials.');
+        navigate('/login');
       } else {
         setError(data.message || 'Registration failed');
       }
