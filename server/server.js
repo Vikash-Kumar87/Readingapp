@@ -26,24 +26,29 @@ const normalizeUrl = (url) => {
 // Middleware
 app.use(cors({
   origin: function (origin, callback) {
-    const allowedOrigins = [
-      normalizeUrl(process.env.FRONTEND_URL),
-      'https://readingapp-sigma.vercel.app',
-      'http://localhost:5173',
-      'http://localhost:3000'
-    ].filter(Boolean);
-    
     // Allow requests with no origin (mobile apps, Postman, etc.)
     if (!origin) return callback(null, true);
     
     // Normalize the incoming origin
     const normalizedOrigin = normalizeUrl(origin);
     
+    // Allow all Vercel preview/deployment URLs
+    if (normalizedOrigin.includes('vercel.app')) {
+      return callback(null, true);
+    }
+    
+    // Check specific allowed origins
+    const allowedOrigins = [
+      normalizeUrl(process.env.FRONTEND_URL),
+      'http://localhost:5173',
+      'http://localhost:3000'
+    ].filter(Boolean);
+    
     if (allowedOrigins.includes(normalizedOrigin)) {
       callback(null, true);
     } else {
       console.log('CORS blocked origin:', origin);
-      callback(new Error('Not allowed by CORS'));
+      callback(null, false);
     }
   },
   credentials: true,
