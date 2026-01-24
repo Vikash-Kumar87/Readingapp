@@ -284,8 +284,8 @@ const Settings = () => {
           </button>
         </form>
       </motion.div>
-    </AdminLayout>
     </div>
+    </AdminLayout>
   );
 };
 
