@@ -1,6 +1,6 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
+// const bcrypt = require('bcrypt'); // REMOVED - plain text passwords now
 const User = require('./models/User');
 const Teacher = require('./models/Teacher');
 const Note = require('./models/Note');
