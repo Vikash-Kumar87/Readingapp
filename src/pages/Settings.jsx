@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import AdminLayout from '../layouts/AdminLayout';
 import API_BASE_URL from '../config/api';
 
 const Settings = () => {
@@ -121,7 +122,8 @@ const Settings = () => {
   }
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <AdminLayout>
+      <div className="p-6 max-w-4xl mx-auto">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -282,6 +284,7 @@ const Settings = () => {
           </button>
         </form>
       </motion.div>
+    </AdminLayout>
     </div>
   );
 };

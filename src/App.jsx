@@ -106,7 +106,7 @@ function App() {
           <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
           <Route path="/admin/teachers" element={<AdminRoute><ManageTeachers /></AdminRoute>} />
           <Route path="/admin/notes" element={<AdminRoute><ManageNotes /></AdminRoute>} />
-          <Route path="/admin/settings" element={<AdminRoute><AdminLayout><Settings /></AdminLayout></AdminRoute>} />
+          <Route path="/admin/settings" element={<AdminRoute><Settings /></AdminRoute>} />
         </Routes>
       </AnimatePresence>
     </Router>
