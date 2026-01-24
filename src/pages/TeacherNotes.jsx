@@ -241,14 +241,41 @@ function TeacherNotes() {
               {selectedNote && selectedNote.fileUrl ? (
                 <div className="w-full bg-white">
                   {selectedNote.fileType === 'pdf' ? (
-                    // PDF Viewer - Responsive
+                    // PDF Viewer - Mobile Optimized
                     <div className="relative w-full bg-white" style={{ height: '600px' }}>
-                      <iframe
-                        src={`${API_BASE_URL}${selectedNote.fileUrl}#toolbar=0&navpanes=0&scrollbar=1&view=FitH`}
-                        className="w-full h-full border-0 bg-white"
-                        title="Note Preview"
-                        style={{ display: 'block' }}
-                      />
+                      <object
+                        data={`${API_BASE_URL}${selectedNote.fileUrl}#toolbar=0&navpanes=0&scrollbar=1&view=FitH&zoom=page-fit`}
+                        type="application/pdf"
+                        className="w-full h-full"
+                        style={{ pointerEvents: isReadOnly ? 'none' : 'auto' }}
+                      >
+                        <div className="flex flex-col items-center justify-center h-full p-8 bg-gradient-to-br from-purple-50 to-pink-50">
+                          <FileText className="w-16 h-16 text-purple-600 mb-4" />
+                          <p className="text-lg font-semibold text-slate-700 mb-2">PDF Viewer Not Supported</p>
+                          <p className="text-sm text-slate-500 mb-6 text-center">Your browser doesn't support embedded PDFs. Please use Chrome, Safari, or Edge for best experience.</p>
+                          {!isReadOnly && (
+                            <button
+                              onClick={() => window.open(`${API_BASE_URL}${selectedNote.fileUrl}`, '_blank')}
+                              className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all"
+                            >
+                              <Eye className="w-5 h-5" />
+                              <span>Open in New Tab</span>
+                            </button>
+                          )}
+                        </div>
+                      </object>
+                      {/* Overlay to prevent right-click and download */}
+                      {isReadOnly && (
+                        <div 
+                          className="absolute inset-0 bg-transparent"
+                          onContextMenu={(e) => e.preventDefault()}
+                          style={{ 
+                            pointerEvents: 'auto',
+                            userSelect: 'none',
+                            WebkitTouchCallout: 'none'
+                          }}
+                        />
+                      )}
                     </div>
                   ) : (
                     // Image Viewer - Responsive
