@@ -1,9 +1,10 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
+// const bcrypt = require('bcrypt'); // REMOVED - passwords stored as plain text
 
 /**
  * User Schema
  * Handles user authentication and purchased notes tracking
+ * WARNING: Passwords are stored as plain text (NOT SECURE!)
  */
 const userSchema = new mongoose.Schema({
   name: {
@@ -37,22 +38,13 @@ const userSchema = new mongoose.Schema({
   }
 });
 
-// Hash password before saving
-userSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) return next();
-  
-  try {
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-    next();
-  } catch (error) {
-    next(error);
-  }
-});
+// REMOVED password hashing - storing plain text passwords
+// userSchema.pre('save', async function(next) { ... });
 
-// Method to compare password
+// Method to compare password (plain text comparison)
 userSchema.methods.comparePassword = async function(candidatePassword) {
-  return await bcrypt.compare(candidatePassword, this.password);
+  // Simple plain text comparison
+  return candidatePassword === this.password;
 };
 
 module.exports = mongoose.model('User', userSchema);
