@@ -241,38 +241,33 @@ function TeacherNotes() {
               {selectedNote && selectedNote.fileUrl ? (
                 <div className="w-full bg-white">
                   {selectedNote.fileType === 'pdf' ? (
-                    // PDF Viewer - Mobile Optimized
+                    // PDF Viewer - Mobile Compatible
                     <div className="relative w-full bg-white" style={{ height: '600px' }}>
-                      <object
-                        data={`${API_BASE_URL}${selectedNote.fileUrl}#toolbar=0&navpanes=0&scrollbar=1&view=FitH&zoom=page-fit`}
-                        type="application/pdf"
-                        className="w-full h-full"
-                        style={{ pointerEvents: isReadOnly ? 'none' : 'auto' }}
-                      >
-                        <div className="flex flex-col items-center justify-center h-full p-8 bg-gradient-to-br from-purple-50 to-pink-50">
-                          <FileText className="w-16 h-16 text-purple-600 mb-4" />
-                          <p className="text-lg font-semibold text-slate-700 mb-2">PDF Viewer Not Supported</p>
-                          <p className="text-sm text-slate-500 mb-6 text-center">Your browser doesn't support embedded PDFs. Please use Chrome, Safari, or Edge for best experience.</p>
-                          {!isReadOnly && (
-                            <button
-                              onClick={() => window.open(`${API_BASE_URL}${selectedNote.fileUrl}`, '_blank')}
-                              className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all"
-                            >
-                              <Eye className="w-5 h-5" />
-                              <span>Open in New Tab</span>
-                            </button>
-                          )}
-                        </div>
-                      </object>
-                      {/* Overlay to prevent right-click and download */}
+                      {/* Use iframe with Google Docs viewer for better mobile compatibility */}
+                      <iframe
+                        src={`https://docs.google.com/viewer?url=${encodeURIComponent(API_BASE_URL + selectedNote.fileUrl)}&embedded=true`}
+                        className="w-full h-full border-0"
+                        title="PDF Viewer"
+                        allow="fullscreen"
+                        style={{ 
+                          pointerEvents: isReadOnly ? 'none' : 'auto',
+                          background: 'white'
+                        }}
+                      />
+                      {/* Overlay to prevent interactions in read-only mode */}
                       {isReadOnly && (
                         <div 
                           className="absolute inset-0 bg-transparent"
                           onContextMenu={(e) => e.preventDefault()}
+                          onTouchStart={(e) => {
+                            // Prevent long press on mobile
+                            e.preventDefault();
+                          }}
                           style={{ 
                             pointerEvents: 'auto',
                             userSelect: 'none',
-                            WebkitTouchCallout: 'none'
+                            WebkitTouchCallout: 'none',
+                            WebkitUserSelect: 'none'
                           }}
                         />
                       )}
