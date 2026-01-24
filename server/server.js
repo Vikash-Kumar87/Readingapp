@@ -17,10 +17,39 @@ const app = express();
 // Connect to MongoDB
 connectDB();
 
+// Helper function to normalize URLs (remove trailing slash)
+const normalizeUrl = (url) => {
+  if (!url) return url;
+  return url.replace(/\/$/, '');
+};
+
 // Middleware
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-  credentials: true
+  origin: function (origin, callback) {
+    const allowedOrigins = [
+      normalizeUrl(process.env.FRONTEND_URL),
+      'https://readingapp-sigma.vercel.app',
+      'http://localhost:5173',
+      'http://localhost:3000'
+    ].filter(Boolean);
+    
+    // Allow requests with no origin (mobile apps, Postman, etc.)
+    if (!origin) return callback(null, true);
+    
+    // Normalize the incoming origin
+    const normalizedOrigin = normalizeUrl(origin);
+    
+    if (allowedOrigins.includes(normalizedOrigin)) {
+      callback(null, true);
+    } else {
+      console.log('CORS blocked origin:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  exposedHeaders: ['set-cookie']
 }));
 
 app.use(express.json());
