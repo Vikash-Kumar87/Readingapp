@@ -241,30 +241,20 @@ function TeacherNotes() {
               {selectedNote && selectedNote.fileUrl ? (
                 <div className="w-full bg-white">
                   {selectedNote.fileType === 'pdf' ? (
-                    // PDF Viewer - Mobile Compatible
+                    // PDF Viewer - Works on all devices
                     <div className="relative w-full bg-white" style={{ height: '600px' }}>
-                      {/* Use iframe with Google Docs viewer for better mobile compatibility */}
                       <iframe
-                        src={`https://docs.google.com/viewer?url=${encodeURIComponent(API_BASE_URL + selectedNote.fileUrl)}&embedded=true`}
+                        src={`${API_BASE_URL}${selectedNote.fileUrl}#toolbar=0&navpanes=0&scrollbar=1&view=FitH`}
                         className="w-full h-full border-0"
                         title="PDF Viewer"
                         allow="fullscreen"
-                        style={{ 
-                          pointerEvents: isReadOnly ? 'none' : 'auto',
-                          background: 'white'
-                        }}
+                        style={{ background: 'white' }}
                       />
-                      {/* Overlay to prevent interactions in read-only mode */}
+                      {/* Protection overlay for read-only mode */}
                       {isReadOnly && (
                         <div 
-                          className="absolute inset-0 bg-transparent"
-                          onContextMenu={(e) => e.preventDefault()}
-                          onTouchStart={(e) => {
-                            // Prevent long press on mobile
-                            e.preventDefault();
-                          }}
+                          className="absolute inset-0 bg-transparent pointer-events-none"
                           style={{ 
-                            pointerEvents: 'auto',
                             userSelect: 'none',
                             WebkitTouchCallout: 'none',
                             WebkitUserSelect: 'none'
