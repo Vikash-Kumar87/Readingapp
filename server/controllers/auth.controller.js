@@ -32,31 +32,18 @@ exports.register = async (req, res) => {
       password
     });
 
-    // Create session for new user
-    req.session.userId = user._id;
-    req.session.isAdmin = user.isAdmin;
-    req.session.name = user.name;
+    console.log('✅ User created successfully:', user.email);
 
-    // Save session and send response
-    req.session.save((err) => {
-      if (err) {
-        console.error('Session save error:', err);
-        return res.status(500).json({
-          success: false,
-          message: 'User created but error saving session'
-        });
+    // DON'T create session - user should login separately
+    // User will need to login after registration
+
+    res.status(201).json({
+      success: true,
+      message: 'User registered successfully. Please login.',
+      user: {
+        name: user.name,
+        email: user.email
       }
-
-      res.status(201).json({
-        success: true,
-        message: 'User registered successfully',
-        user: {
-          userId: user._id,
-          name: user.name,
-          email: user.email,
-          isAdmin: user.isAdmin
-        }
-      });
     });
   } catch (error) {
     console.error('Register error:', error);
