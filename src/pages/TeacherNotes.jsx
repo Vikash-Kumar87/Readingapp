@@ -114,6 +114,8 @@ function TeacherNotes() {
 
   const openNote = (note, index) => {
     console.log('Opening note:', note); // Debug log
+    console.log('File URL:', note.fileUrl); // Debug file URL
+    console.log('Full PDF URL:', `${API_BASE_URL}${note.fileUrl}`); // Debug full URL
     setSelectedNote(note);
     setCurrentPage(index);
   };
@@ -249,6 +251,8 @@ function TeacherNotes() {
                         title="PDF Viewer"
                         allow="fullscreen"
                         style={{ background: 'white' }}
+                        onLoad={() => console.log('PDF loaded successfully:', `${API_BASE_URL}${selectedNote.fileUrl}`)}
+                        onError={(e) => console.error('PDF load error:', e, 'URL:', `${API_BASE_URL}${selectedNote.fileUrl}`)}
                       />
                       {/* Protection overlay for read-only mode */}
                       {isReadOnly && (
