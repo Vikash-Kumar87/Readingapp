@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate, Link } from 'react-router-dom';
-import { LogIn, User, Lock, Mail, Eye, EyeOff } from 'lucide-react';
+import { LogIn, User, Lock, Mail, Eye, EyeOff, Download } from 'lucide-react';
 import API_BASE_URL from '../config/api';
 
 /**
@@ -17,6 +17,43 @@ function Login() {
     password: ''
   });
   const [error, setError] = useState('');
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [showInstallButton, setShowInstallButton] = useState(false);
+
+  // PWA Install Prompt Handler
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setShowInstallButton(true);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+      setShowInstallButton(false);
+    }
+    // Don't show button by default - only when prompt is ready
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (deferredPrompt) {
+      // Browser supports automatic install - use it!
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      
+      if (outcome === 'accepted') {
+        console.log('✅ App installed successfully!');
+      }
+      
+      setDeferredPrompt(null);
+      setShowInstallButton(false);
+    }
+  };
 
   const handleChange = (e) => {
     setFormData({
@@ -176,6 +213,29 @@ function Login() {
               </Link>
             </p>
           </div>
+
+          {/* Install App Button */}
+          {showInstallButton && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className="mt-4"
+            >
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={handleInstallClick}
+                className="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold py-3 rounded-xl hover:shadow-lg hover:shadow-green-500/50 transition-all flex items-center justify-center space-x-2 border border-white/20"
+              >
+                <Download className="w-5 h-5" />
+                <span>📱 Install App on Your Device</span>
+              </motion.button>
+              <p className="text-white/50 text-xs text-center mt-2">
+                Install for faster access and offline use
+              </p>
+            </motion.div>
+          )}
         </div>
       </motion.div>
     </div>
