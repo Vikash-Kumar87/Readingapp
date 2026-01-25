@@ -78,9 +78,9 @@ exports.createTeacher = async (req, res) => {
       description
     };
 
-    // Add photo path if file was uploaded
+    // Add photo URL if file was uploaded to Cloudinary
     if (req.file) {
-      teacherData.profileImage = '/uploads/' + req.file.filename;
+      teacherData.profileImage = req.file.path; // Cloudinary URL
     }
 
     const teacher = await Teacher.create(teacherData);
@@ -109,9 +109,9 @@ exports.updateTeacher = async (req, res) => {
 
     const updateData = { name, subject, description };
 
-    // Add photo path if new file was uploaded
+    // Add photo URL if new file was uploaded to Cloudinary
     if (req.file) {
-      updateData.profileImage = '/uploads/' + req.file.filename;
+      updateData.profileImage = req.file.path; // Cloudinary URL
     }
 
     const teacher = await Teacher.findByIdAndUpdate(

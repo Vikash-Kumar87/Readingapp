@@ -145,10 +145,10 @@ exports.createNote = async (req, res) => {
       });
     }
 
-    // Handle file upload (if file was uploaded)
+    // Handle file upload (if file was uploaded to Cloudinary)
     let fileUrl = req.body.fileUrl || 'https://via.placeholder.com/800x1000?text=Note';
     if (req.file) {
-      fileUrl = `/uploads/${req.file.filename}`;
+      fileUrl = req.file.path; // Cloudinary URL
     }
 
     const note = await Note.create({

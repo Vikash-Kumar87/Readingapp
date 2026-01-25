@@ -76,7 +76,8 @@ app.use(session({
   }
 }));
 
-// Serve uploaded files
+// Serve old uploaded files (for backward compatibility)
+// New uploads will go to Cloudinary
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // API Routes
