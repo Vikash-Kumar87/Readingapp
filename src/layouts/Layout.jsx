@@ -105,30 +105,30 @@ function Layout({ children }) {
           <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-pink-500 rounded-full blur-3xl"></div>
         </div>
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-10 mb-6 sm:mb-8">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
             {/* About Section */}
-            <div className="text-white">
-              <div className="flex items-center justify-center sm:justify-start space-x-2 mb-4">
-                <BookOpen className="w-6 h-6 sm:w-7 sm:h-7" />
-                <h3 className="text-lg sm:text-xl font-bold">Teacher Notes</h3>
+            <div className="text-white text-center md:text-left">
+              <div className="flex items-center justify-center md:justify-start space-x-2 mb-3">
+                <BookOpen className="w-6 h-6" />
+                <h3 className="text-xl font-bold">Teacher Notes</h3>
               </div>
-              <p className="text-white/90 text-sm sm:text-base leading-relaxed text-center sm:text-left">
+              <p className="text-white/90 text-sm leading-relaxed">
                 Access high-quality handwritten notes from expert teachers. Learn at your own pace with our modern reading platform.
               </p>
             </div>
 
             {/* Quick Links */}
-            <div className="text-white">
-              <h3 className="text-lg sm:text-xl font-bold mb-4 text-center sm:text-left">Quick Links</h3>
-              <ul className="space-y-3 text-sm sm:text-base">
-                <li className="text-center sm:text-left">
+            <div className="text-white text-center md:text-left">
+              <h3 className="text-xl font-bold mb-3">Quick Links</h3>
+              <ul className="space-y-2 text-sm">
+                <li>
                   <Link to="/dashboard" className="text-white/90 hover:text-white transition-colors inline-flex items-center space-x-2 hover:translate-x-1 transform duration-200">
                     <span>→</span>
                     <span>Home</span>
                   </Link>
                 </li>
-                <li className="text-center sm:text-left">
+                <li>
                   <a href="#teachers" className="text-white/90 hover:text-white transition-colors inline-flex items-center space-x-2 hover:translate-x-1 transform duration-200">
                     <span>→</span>
                     <span>Teachers</span>
@@ -138,35 +138,35 @@ function Layout({ children }) {
             </div>
 
             {/* Contact Info */}
-            <div className="text-white">
-              <h3 className="text-lg sm:text-xl font-bold mb-4 text-center sm:text-left">Contact Us</h3>
-              <div className="space-y-3 text-sm sm:text-base">
-                <div className="flex items-center justify-center sm:justify-start space-x-2">
-                  <span className="text-white/90 text-lg">📧</span>
-                  <a href="mailto:vikashkr30112003@gmail.com" className="text-white/90 hover:text-white transition-colors break-all">
+            <div className="text-white text-center md:text-left">
+              <h3 className="text-xl font-bold mb-3">Contact Us</h3>
+              <div className="space-y-2 text-sm">
+                <div className="flex items-center justify-center md:justify-start space-x-2">
+                  <span className="text-lg">📧</span>
+                  <a href="mailto:vikashkr30112003@gmail.com" className="text-white/90 hover:text-white transition-colors truncate max-w-[200px]">
                     vikashkr30112003@gmail.com
                   </a>
                 </div>
-                <div className="flex items-center justify-center sm:justify-start space-x-2">
-                  <span className="text-white/90 text-lg">📱</span>
+                <div className="flex items-center justify-center md:justify-start space-x-2">
+                  <span className="text-lg">📱</span>
                   <a href="tel:+918789060869" className="text-white/90 hover:text-white transition-colors">
                     +91 8789060869
                   </a>
                 </div>
                 <div className="mt-4">
-                  <p className="text-sm text-white/80 mb-3 text-center sm:text-left">Follow Us</p>
-                  <div className="flex justify-center sm:justify-start space-x-3">
-                    <a href="#facebook" className="w-10 h-10 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-white/30 transition-all border border-white/30 hover:scale-110 transform duration-200">
-                      <span className="text-white text-base font-bold">f</span>
+                  <p className="text-xs text-white/80 mb-2">Follow Us</p>
+                  <div className="flex justify-center md:justify-start space-x-2">
+                    <a href="#facebook" className="w-9 h-9 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-white/30 transition-all border border-white/30 hover:scale-110 transform duration-200">
+                      <span className="text-white text-sm font-bold">f</span>
                     </a>
-                    <a href="#youtube" className="w-10 h-10 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-white/30 transition-all border border-white/30 hover:scale-110 transform duration-200">
-                      <span className="text-white text-base">▶</span>
+                    <a href="#youtube" className="w-9 h-9 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-white/30 transition-all border border-white/30 hover:scale-110 transform duration-200">
+                      <span className="text-white text-sm">▶</span>
                     </a>
-                    <a href="#instagram" className="w-10 h-10 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-white/30 transition-all border border-white/30 hover:scale-110 transform duration-200">
-                      <span className="text-white text-base">📷</span>
+                    <a href="#instagram" className="w-9 h-9 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-white/30 transition-all border border-white/30 hover:scale-110 transform duration-200">
+                      <span className="text-white text-sm">📷</span>
                     </a>
-                    <a href="https://www.linkedin.com/in/vikash-kumar89?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app" target="_blank" rel="noopener noreferrer" className="w-10 h-10 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-white/30 transition-all border border-white/30 hover:scale-110 transform duration-200">
-                      <span className="text-white text-base font-bold">in</span>
+                    <a href="https://www.linkedin.com/in/vikash-kumar89?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app" target="_blank" rel="noopener noreferrer" className="w-9 h-9 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-white/30 transition-all border border-white/30 hover:scale-110 transform duration-200">
+                      <span className="text-white text-sm font-bold">in</span>
                     </a>
                   </div>
                 </div>
@@ -176,11 +176,11 @@ function Layout({ children }) {
 
           {/* Bottom Bar */}
           <div className="pt-6 border-t border-white/20">
-            <div className="flex flex-col md:flex-row justify-between items-center space-y-3 md:space-y-0">
-              <p className="text-white/90 text-sm sm:text-base text-center">
+            <div className="flex flex-col items-center space-y-2 text-center">
+              <p className="text-white/90 text-xs sm:text-sm">
                 © 2026 Teacher Notes. All rights reserved.
               </p>
-              <p className="text-white/80 text-sm sm:text-base text-center">
+              <p className="text-white/80 text-xs sm:text-sm">
                 Made with ❤️ for better education
               </p>
             </div>
