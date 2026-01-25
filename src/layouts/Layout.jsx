@@ -121,29 +121,17 @@ function Layout({ children }) {
             {/* Quick Links */}
             <div className="text-white">
               <h3 className="text-lg sm:text-xl font-bold mb-4 text-center sm:text-left">Quick Links</h3>
-              <ul className="space-y-2.5 text-sm sm:text-base">
+              <ul className="space-y-3 text-sm sm:text-base">
                 <li className="text-center sm:text-left">
-                  <Link to="/dashboard" className="text-white/90 hover:text-white transition-colors inline-flex items-center space-x-1 hover:translate-x-1 transform duration-200">
+                  <Link to="/dashboard" className="text-white/90 hover:text-white transition-colors inline-flex items-center space-x-2 hover:translate-x-1 transform duration-200">
                     <span>→</span>
                     <span>Home</span>
                   </Link>
                 </li>
                 <li className="text-center sm:text-left">
-                  <a href="#courses" className="text-white/90 hover:text-white transition-colors inline-flex items-center space-x-1 hover:translate-x-1 transform duration-200">
-                    <span>→</span>
-                    <span>Courses</span>
-                  </a>
-                </li>
-                <li className="text-center sm:text-left">
-                  <a href="#teachers" className="text-white/90 hover:text-white transition-colors inline-flex items-center space-x-1 hover:translate-x-1 transform duration-200">
+                  <a href="#teachers" className="text-white/90 hover:text-white transition-colors inline-flex items-center space-x-2 hover:translate-x-1 transform duration-200">
                     <span>→</span>
                     <span>Teachers</span>
-                  </a>
-                </li>
-                <li className="text-center sm:text-left">
-                  <a href="#contact" className="text-white/90 hover:text-white transition-colors inline-flex items-center space-x-1 hover:translate-x-1 transform duration-200">
-                    <span>→</span>
-                    <span>Contact</span>
                   </a>
                 </li>
               </ul>
