@@ -64,7 +64,7 @@ function ManageTeachers() {
       notesCount: teacher.notesCount,
       description: teacher.description || '',
       photo: null,
-      photoPreview: teacher.profileImage ? `${API_BASE_URL}${teacher.profileImage}` : null
+      photoPreview: teacher.profileImage ? teacher.profileImage : null
     });
     setIsModalOpen(true);
   };
@@ -176,7 +176,7 @@ function ManageTeachers() {
                 <div className="flex justify-center mb-4">
                   {teacher.profileImage ? (
                     <img
-                      src={`${API_BASE_URL}${teacher.profileImage}`}
+                      src={teacher.profileImage}
                       alt={teacher.name}
                       className="w-20 h-20 rounded-full object-cover shadow-lg border-2 border-white"
                     />
