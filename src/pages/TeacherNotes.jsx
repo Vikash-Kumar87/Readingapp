@@ -246,13 +246,13 @@ function TeacherNotes() {
                     // PDF Viewer - Works on all devices
                     <div className="relative w-full bg-white" style={{ height: '600px' }}>
                       <iframe
-                        src={`${API_BASE_URL}${selectedNote.fileUrl}#toolbar=0&navpanes=0&scrollbar=1&view=FitH`}
+                        src={selectedNote.fileUrl.startsWith('http') ? `${selectedNote.fileUrl}#toolbar=0&navpanes=0&scrollbar=1&view=FitH` : `${API_BASE_URL}${selectedNote.fileUrl}#toolbar=0&navpanes=0&scrollbar=1&view=FitH`}
                         className="w-full h-full border-0"
                         title="PDF Viewer"
                         allow="fullscreen"
                         style={{ background: 'white' }}
-                        onLoad={() => console.log('PDF loaded successfully:', `${API_BASE_URL}${selectedNote.fileUrl}`)}
-                        onError={(e) => console.error('PDF load error:', e, 'URL:', `${API_BASE_URL}${selectedNote.fileUrl}`)}
+                        onLoad={() => console.log('PDF loaded successfully')}
+                        onError={(e) => console.error('PDF load error:', e)}
                       />
                       {/* Protection overlay for read-only mode */}
                       {isReadOnly && (
@@ -270,7 +270,7 @@ function TeacherNotes() {
                     // Image Viewer - Responsive
                     <div className="bg-white p-4 min-h-[500px]">
                       <img
-                        src={`${API_BASE_URL}${selectedNote.fileUrl}`}
+                        src={selectedNote.fileUrl.startsWith('http') ? selectedNote.fileUrl : `${API_BASE_URL}${selectedNote.fileUrl}`}
                         alt={selectedNote.title}
                         className="w-full h-auto max-w-full mx-auto rounded-xl shadow-2xl"
                         style={{ display: 'block' }}
