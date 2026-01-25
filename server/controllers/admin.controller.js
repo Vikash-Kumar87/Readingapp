@@ -76,9 +76,10 @@ exports.createTeacher = async (req, res) => {
       notesCount: 0
     };
 
-    // Add photo URL if file was uploaded to Cloudinary
+    // Convert uploaded photo to Base64 and store in database
     if (req.file) {
-      teacherData.profileImage = req.file.path; // Cloudinary URL
+      const base64Image = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+      teacherData.profileImage = base64Image;
     }
 
     const teacher = await Teacher.create(teacherData);
@@ -107,9 +108,10 @@ exports.updateTeacher = async (req, res) => {
 
     const updateData = { name, subject, description };
 
-    // Add photo URL if new file was uploaded to Cloudinary
+    // Convert uploaded photo to Base64 and store in database
     if (req.file) {
-      updateData.profileImage = req.file.path; // Cloudinary URL
+      const base64Image = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+      updateData.profileImage = base64Image;
     }
 
     const teacher = await Teacher.findByIdAndUpdate(
@@ -195,16 +197,19 @@ exports.createNotes = async (req, res) => {
       });
     }
 
-    // Create notes for each uploaded file (stored in Cloudinary)
-    const notesData = files.map(file => ({
-      title,
-      subject: teacher.subject,
-      teacher: teacherId,
-      fileUrl: file.path, // Cloudinary URL
-      fileType: file.mimetype === 'application/pdf' ? 'pdf' : 'image',
-      price: parseFloat(price) || 0,
-      isPaid: parseFloat(price) > 0
-    }));
+    // Create notes for each uploaded file - store as Base64 in database
+    const notesData = files.map(file => {
+      const base64File = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
+      return {
+        title,
+        subject: teacher.subject,
+        teacher: teacherId,
+        fileUrl: base64File,
+        fileType: file.mimetype === 'application/pdf' ? 'pdf' : 'image',
+        price: parseFloat(price) || 0,
+        isPaid: parseFloat(price) > 0
+      };
+    });
 
     const notes = await Note.insertMany(notesData);
 

@@ -63,7 +63,7 @@ function TeacherCard({ teacher }) {
           >
             {teacher.profileImage ? (
               <img
-                src={teacher.profileImage.startsWith('http') ? teacher.profileImage : `${API_BASE_URL}${teacher.profileImage}`}
+                src={teacher.profileImage}
                 alt={teacher.name}
                 className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-glow"
               />

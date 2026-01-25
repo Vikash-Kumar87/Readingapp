@@ -246,7 +246,7 @@ function TeacherNotes() {
                     // PDF Viewer - Works on all devices
                     <div className="relative w-full bg-white" style={{ height: '600px' }}>
                       <iframe
-                        src={selectedNote.fileUrl.startsWith('http') ? `${selectedNote.fileUrl}#toolbar=0&navpanes=0&scrollbar=1&view=FitH` : `${API_BASE_URL}${selectedNote.fileUrl}#toolbar=0&navpanes=0&scrollbar=1&view=FitH`}
+                        src={`${selectedNote.fileUrl}#toolbar=0&navpanes=0&scrollbar=1&view=FitH`}
                         className="w-full h-full border-0"
                         title="PDF Viewer"
                         allow="fullscreen"
@@ -270,7 +270,7 @@ function TeacherNotes() {
                     // Image Viewer - Responsive
                     <div className="bg-white p-4 min-h-[500px]">
                       <img
-                        src={selectedNote.fileUrl.startsWith('http') ? selectedNote.fileUrl : `${API_BASE_URL}${selectedNote.fileUrl}`}
+                        src={selectedNote.fileUrl}
                         alt={selectedNote.title}
                         className="w-full h-auto max-w-full mx-auto rounded-xl shadow-2xl"
                         style={{ display: 'block' }}

@@ -145,10 +145,10 @@ exports.createNote = async (req, res) => {
       });
     }
 
-    // Handle file upload (if file was uploaded to Cloudinary)
+    // Convert uploaded file to Base64 and store in database
     let fileUrl = req.body.fileUrl || 'https://via.placeholder.com/800x1000?text=Note';
     if (req.file) {
-      fileUrl = req.file.path; // Cloudinary URL
+      fileUrl = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
     }
 
     const note = await Note.create({
