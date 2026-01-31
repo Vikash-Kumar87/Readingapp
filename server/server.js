@@ -5,6 +5,7 @@ const MongoStore = require('connect-mongo');
 const cors = require('cors');
 const path = require('path');
 const connectDB = require('./config/db');
+const mongoose = require('mongoose');
 
 // Import routes
 const authRoutes = require('./routes/auth.routes');
@@ -19,8 +20,8 @@ const app = express();
 // Trust proxy - Required for Render and other proxy services
 app.set('trust proxy', 1);
 
-// Connect to MongoDB
-connectDB();
+// Connect to MongoDB FIRST (returns promise)
+const dbConnection = connectDB();
 
 // Helper function to normalize URLs (remove trailing slash)
 const normalizeUrl = (url) => {
@@ -79,22 +80,18 @@ app.use(session({
   saveUninitialized: false,
   store: MongoStore.create({
     mongoUrl: process.env.MONGODB_URI,
-    touchAfter: 24 * 3600, // Lazy session update - only update session once per 24 hours unless changed
-    crypto: {
-      secret: process.env.SESSION_SECRET || 'mysecretkey123'
-    },
-    ttl: 24 * 60 * 60, // Session TTL (1 day) in seconds
-    autoRemove: 'native', // Let MongoDB handle expired session cleanup
-    stringify: false
+    collectionName: 'sessions',
+    ttl: 24 * 60 * 60,
+    touchAfter: 24 * 3600
   }),
-  proxy: true, // Trust the reverse proxy (Render)
-  name: 'connect.sid', // Standard cookie name for better compatibility
+  proxy: true,
+  name: 'connect.sid',
   cookie: {
-    secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
+    secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
-    maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' for cross-site in production
-    path: '/', // Explicitly set cookie path
+    maxAge: 24 * 60 * 60 * 1000,
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    path: '/',
   }
 }));
 
