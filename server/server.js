@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
+const MongoStore = require('connect-mongo');
 const cors = require('cors');
 const path = require('path');
 const connectDB = require('./config/db');
@@ -71,13 +72,23 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Session configuration - Mobile friendly settings
+// Session configuration - Mobile friendly with MongoDB store
 app.use(session({
   secret: process.env.SESSION_SECRET || 'mysecretkey123',
-  resave: true, // Changed to true for mobile compatibility
-  saveUninitialized: true, // Changed to true for mobile compatibility
+  resave: false,
+  saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGODB_URI,
+    touchAfter: 24 * 3600, // Lazy session update - only update session once per 24 hours unless changed
+    crypto: {
+      secret: process.env.SESSION_SECRET || 'mysecretkey123'
+    },
+    ttl: 24 * 60 * 60, // Session TTL (1 day) in seconds
+    autoRemove: 'native', // Let MongoDB handle expired session cleanup
+    stringify: false
+  }),
   proxy: true, // Trust the reverse proxy (Render)
-  name: 'sessionId', // Custom cookie name
+  name: 'connect.sid', // Standard cookie name for better compatibility
   cookie: {
     secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
     httpOnly: true,
