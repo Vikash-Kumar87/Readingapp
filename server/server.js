@@ -27,7 +27,7 @@ const normalizeUrl = (url) => {
   return url.replace(/\/$/, '');
 };
 
-// Middleware
+// Middleware - Enhanced CORS for mobile browsers
 app.use(cors({
   origin: function (origin, callback) {
     // Allow requests with no origin (mobile apps, Postman, etc.)
@@ -61,25 +61,29 @@ app.use(cors({
     }
   },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  exposedHeaders: ['set-cookie']
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie', 'Set-Cookie'],
+  exposedHeaders: ['set-cookie', 'Set-Cookie'],
+  preflightContinue: false,
+  optionsSuccessStatus: 204
 }));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Session configuration
+// Session configuration - Mobile friendly settings
 app.use(session({
   secret: process.env.SESSION_SECRET || 'mysecretkey123',
-  resave: false,
-  saveUninitialized: false,
+  resave: true, // Changed to true for mobile compatibility
+  saveUninitialized: true, // Changed to true for mobile compatibility
+  proxy: true, // Trust the reverse proxy (Render)
+  name: 'sessionId', // Custom cookie name
   cookie: {
     secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
     httpOnly: true,
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
     sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' for cross-site in production
-    domain: process.env.NODE_ENV === 'production' ? undefined : undefined // Let browser handle domain
+    path: '/', // Explicitly set cookie path
   }
 }));
 

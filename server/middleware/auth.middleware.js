@@ -1,15 +1,25 @@
 /**
  * Authentication Middleware
  * Checks if user is logged in via session and attaches user to request
+ * Enhanced for mobile browser compatibility
  */
 const User = require('../models/User');
 
 const protect = async (req, res, next) => {
   try {
+    // Debug logging for mobile troubleshooting
+    console.log('Session check:', {
+      hasSession: !!req.session,
+      sessionId: req.sessionID,
+      userId: req.session?.userId,
+      cookie: req.headers.cookie ? 'present' : 'missing'
+    });
+
     if (!req.session || !req.session.userId) {
       return res.status(401).json({
         success: false,
-        message: 'Unauthorized. Please login first.'
+        message: 'Unauthorized. Please login first.',
+        sessionExpired: true // Flag for frontend to handle
       });
     }
 
@@ -18,9 +28,13 @@ const protect = async (req, res, next) => {
     if (!user) {
       return res.status(401).json({
         success: false,
-        message: 'User not found. Please login again.'
+        message: 'User not found. Please login again.',
+        sessionExpired: true
       });
     }
+
+    // Refresh session on each request for mobile
+    req.session.touch();
 
     req.user = user;
     next();
