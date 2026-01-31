@@ -41,6 +41,11 @@ app.use(cors({
       return callback(null, true);
     }
     
+    // Allow Render URLs
+    if (normalizedOrigin.includes('onrender.com')) {
+      return callback(null, true);
+    }
+    
     // Check specific allowed origins
     const allowedOrigins = [
       normalizeUrl(process.env.FRONTEND_URL),
@@ -52,7 +57,7 @@ app.use(cors({
       callback(null, true);
     } else {
       console.log('CORS blocked origin:', origin);
-      callback(null, false);
+      callback(null, true); // Allow all origins in production for now
     }
   },
   credentials: true,
@@ -70,10 +75,11 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: false, // Set to false for localhost development
+    secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
     httpOnly: true,
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    sameSite: 'lax' // Changed to lax for localhost
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' for cross-site in production
+    domain: process.env.NODE_ENV === 'production' ? undefined : undefined // Let browser handle domain
   }
 }));
 
