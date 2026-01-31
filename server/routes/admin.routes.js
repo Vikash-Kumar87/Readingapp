@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const adminController = require('../controllers/admin.controller');
-const requireAdmin = require('../middleware/admin.middleware');
+const { requireAdmin } = require('../middleware/admin.middleware');
 
 // Configure multer for memory storage (Base64)
 const storage = multer.memoryStorage();

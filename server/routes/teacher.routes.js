@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const teacherController = require('../controllers/teacher.controller');
-const requireAdmin = require('../middleware/admin.middleware');
+const { requireAdmin } = require('../middleware/admin.middleware');
 
 // Public routes
 router.get('/', teacherController.getAllTeachers);

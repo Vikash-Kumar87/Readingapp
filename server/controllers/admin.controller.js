@@ -178,7 +178,7 @@ exports.deleteTeacher = async (req, res) => {
  */
 exports.createNotes = async (req, res) => {
   try {
-    const { teacherId, title, price } = req.body;
+    const { teacherId, title, price, videoUrl, videoType } = req.body;
     const files = req.files;
 
     if (!teacherId || !title || !files || files.length === 0) {
@@ -206,6 +206,8 @@ exports.createNotes = async (req, res) => {
         teacher: teacherId,
         fileUrl: base64File,
         fileType: file.mimetype === 'application/pdf' ? 'pdf' : 'image',
+        videoUrl: videoUrl || null,
+        videoType: videoType || null,
         price: parseFloat(price) || 0,
         isPaid: parseFloat(price) > 0
       };

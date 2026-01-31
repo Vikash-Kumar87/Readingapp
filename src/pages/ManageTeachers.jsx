@@ -33,13 +33,14 @@ function ManageTeachers() {
       const response = await fetch(`${API_BASE_URL}/api/teachers`, {
         credentials: 'include'
       });
-      const data = await response.json();
-      console.log('=== TEACHERS DATA ===');
-      console.log('Full response:', data);
-      if (data.data && data.data.length > 0) {
-        console.log('First teacher:', data.data[0]);
-        console.log('Profile image path:', data.data[0].profileImage);
+      
+      if (response.status === 401) {
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+        return;
       }
+      
+      const data = await response.json();
       if (response.ok && data.success) {
         setTeachersList(data.data || []);
       }
@@ -92,6 +93,18 @@ function ManageTeachers() {
         credentials: 'include',
         body: submitData
       });
+      
+      if (response.status === 401) {
+        alert('Session expired. Please login again.');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+        return;
+      }
+      
+      if (response.status === 403) {
+        alert('Access denied. Admin privileges required.');
+        return;
+      }
       
       const data = await response.json();
       

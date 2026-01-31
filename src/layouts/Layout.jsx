@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { BookOpen, Home as HomeIcon, LogOut } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { BookOpen, Home as HomeIcon, LogOut, LayoutDashboard, User, Menu, X } from 'lucide-react';
 
 /**
  * Layout Component
@@ -11,6 +11,7 @@ function Layout({ children }) {
   const location = useLocation();
   const navigate = useNavigate();
   const isHomePage = location.pathname === '/dashboard';
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   let user = null;
   try {
@@ -23,10 +24,11 @@ function Layout({ children }) {
   const handleLogout = () => {
     localStorage.removeItem('user');
     navigate('/login');
+    setMobileMenuOpen(false);
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-900 transition-colors duration-300">
       {/* Header */}
       <motion.header
         initial={{ y: -100 }}
@@ -51,24 +53,25 @@ function Layout({ children }) {
             </Link>
 
             {/* Navigation */}
-            <nav className="flex items-center space-x-2 sm:space-x-4">
+            <nav className="hidden md:flex items-center space-x-2 sm:space-x-4">
               {user && (
-                <span className="hidden sm:inline-block text-sm text-white/90 font-medium drop-shadow">
-                  Welcome, {user.name}
-                </span>
+                <div className="hidden sm:flex items-center gap-2 px-3 py-1.5">
+                  <User className="w-4 h-4 text-white" />
+                  <span className="text-sm text-white/90 font-medium drop-shadow">
+                    {user.name}
+                  </span>
+                </div>
               )}
-              {!isHomePage && (
-                <Link to="/dashboard">
-                  <motion.button
-                    whileHover={{ scale: 1.05, y: -2 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="flex items-center space-x-1 sm:space-x-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-white/20 backdrop-blur-md text-white rounded-lg sm:rounded-xl hover:bg-white/30 transition-all font-semibold shadow-lg border border-white/30 text-sm sm:text-base"
-                  >
-                    <HomeIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                    <span className="hidden sm:inline">Home</span>
-                  </motion.button>
-                </Link>
-              )}
+              <Link to="/dashboard">
+                <motion.button
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="flex items-center space-x-1 sm:space-x-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-white/20 backdrop-blur-md text-white rounded-lg sm:rounded-xl hover:bg-white/30 transition-all font-semibold shadow-lg border border-white/30 text-sm sm:text-base"
+                >
+                  <HomeIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span className="hidden sm:inline">Home</span>
+                </motion.button>
+              </Link>
               <motion.button
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
@@ -79,8 +82,61 @@ function Layout({ children }) {
                 <span className="hidden sm:inline">Logout</span>
               </motion.button>
             </nav>
+
+            {/* Mobile Menu Button */}
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden p-2 bg-white/20 backdrop-blur-md text-white rounded-lg hover:bg-white/30 transition-all border border-white/30"
+            >
+              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </motion.button>
           </div>
         </div>
+
+        {/* Mobile Menu Dropdown */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.2 }}
+              className="md:hidden bg-gradient-to-r from-purple-700 via-pink-600 to-rose-600 border-t border-white/20"
+            >
+              <div className="px-4 py-3 space-y-2">
+                {/* User Info */}
+                {user && (
+                  <div className="flex items-center gap-2 px-3 py-2 bg-white/10 rounded-lg">
+                    <User className="w-5 h-5 text-white" />
+                    <span className="text-white font-medium">{user.name}</span>
+                  </div>
+                )}
+
+                {/* Home */}
+                <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)}>
+                  <motion.button
+                    whileTap={{ scale: 0.95 }}
+                    className="w-full flex items-center space-x-3 px-4 py-3 bg-white/20 backdrop-blur-md text-white rounded-lg hover:bg-white/30 transition-all font-semibold shadow-lg border border-white/30"
+                  >
+                    <HomeIcon className="w-5 h-5" />
+                    <span>Home</span>
+                  </motion.button>
+                </Link>
+
+                {/* Logout */}
+                <motion.button
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleLogout}
+                  className="w-full flex items-center space-x-3 px-4 py-3 bg-white/20 backdrop-blur-md text-white rounded-lg hover:bg-white/30 transition-all font-semibold shadow-lg border border-white/30"
+                >
+                  <LogOut className="w-5 h-5" />
+                  <span>Logout</span>
+                </motion.button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.header>
 
       {/* Main Content */}
@@ -149,20 +205,20 @@ function Layout({ children }) {
                 </div>
                 <div className="flex items-center justify-center md:justify-start space-x-2">
                   <span className="text-lg">📱</span>
-                  <a href="tel:+918789060869" className="text-white/90 hover:text-white transition-colors">
-                    +91 8789060869
+                  <a href="tel:+919835249335" className="text-white/90 hover:text-white transition-colors">
+                    +91 9835249335
                   </a>
                 </div>
                 <div className="mt-4">
                   <p className="text-xs text-white/80 mb-2">Follow Us</p>
                   <div className="flex justify-center md:justify-start space-x-2">
-                    <a href="#facebook" className="w-9 h-9 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-white/30 transition-all border border-white/30 hover:scale-110 transform duration-200">
+                    <a href="https://www.facebook.com/share/1H7eKyky77/" target="_blank" rel="noopener noreferrer" className="w-9 h-9 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-white/30 transition-all border border-white/30 hover:scale-110 transform duration-200">
                       <span className="text-white text-sm font-bold">f</span>
                     </a>
-                    <a href="#youtube" className="w-9 h-9 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-white/30 transition-all border border-white/30 hover:scale-110 transform duration-200">
+                    <a href="https://youtube.com/@r.vision1664?si=QTiMVUw8boQPZf0h" target="_blank" rel="noopener noreferrer" className="w-9 h-9 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-white/30 transition-all border border-white/30 hover:scale-110 transform duration-200">
                       <span className="text-white text-sm">▶</span>
                     </a>
-                    <a href="#instagram" className="w-9 h-9 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-white/30 transition-all border border-white/30 hover:scale-110 transform duration-200">
+                    <a href="https://www.instagram.com/invites/contact/?igsh=5atg6qvcw95r&utm_content=zp4gj3i" target="_blank" rel="noopener noreferrer" className="w-9 h-9 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-white/30 transition-all border border-white/30 hover:scale-110 transform duration-200">
                       <span className="text-white text-sm">📷</span>
                     </a>
                     <a href="https://www.linkedin.com/in/vikash-kumar89?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app" target="_blank" rel="noopener noreferrer" className="w-9 h-9 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center hover:bg-white/30 transition-all border border-white/30 hover:scale-110 transform duration-200">

@@ -11,13 +11,15 @@ import API_BASE_URL from '../config/api';
  */
 function AdminDashboard() {
   const [stats, setStats] = useState({
-    totalUsers: 0,
+    totalStudents: 0,
     totalTeachers: 0,
     totalNotes: 0,
-    activeSessions: 0
+    activeStudents: 0,
+    totalRevenue: 0,
+    newStudentsThisWeek: 0
   });
-  const [recentTeachers, setRecentTeachers] = useState([]);
-  const [recentNotes, setRecentNotes] = useState([]);
+  const [topTeachers, setTopTeachers] = useState([]);
+  const [topStudents, setTopStudents] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -28,30 +30,15 @@ function AdminDashboard() {
     try {
       setLoading(true);
       
-      // Fetch all data in parallel
-      const [usersRes, teachersRes, notesRes] = await Promise.all([
-        fetch(`${API_BASE_URL}/api/admin/users`, { credentials: 'include' }),
-        fetch(`${API_BASE_URL}/api/teachers`, { credentials: 'include' }),
-        fetch(`${API_BASE_URL}/api/notes`, { credentials: 'include' })
-      ]);
+      const response = await fetch(`${API_BASE_URL}/api/analytics/admin`, {
+        credentials: 'include'
+      });
 
-      const usersData = await usersRes.json();
-      const teachersData = await teachersRes.json();
-      const notesData = await notesRes.json();
-
-      if (usersData.success && teachersData.success && notesData.success) {
-        setStats({
-          totalUsers: usersData.data.length,
-          totalTeachers: teachersData.data.length,
-          totalNotes: notesData.data.length,
-          activeSessions: 0 // Can be implemented later with session tracking
-        });
-
-        // Get recent 3 teachers
-        setRecentTeachers(teachersData.data.slice(0, 3));
-        
-        // Get recent 3 notes
-        setRecentNotes(notesData.data.slice(0, 3));
+      const data = await response.json();
+      if (data.success) {
+        setStats(data.data.overview);
+        setTopTeachers(data.data.topTeachers);
+        setTopStudents(data.data.topStudents);
       }
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
@@ -62,11 +49,11 @@ function AdminDashboard() {
 
   const statsCards = [
     {
-      title: 'Total Users',
-      count: stats.totalUsers.toString(),
+      title: 'Total Students',
+      count: stats.totalStudents.toString(),
       icon: Users,
       color: 'blue',
-      trend: 12
+      trend: ((stats.newStudentsThisWeek / stats.totalStudents) * 100).toFixed(1)
     },
     {
       title: 'Total Teachers',
@@ -83,11 +70,11 @@ function AdminDashboard() {
       trend: 18
     },
     {
-      title: 'Active Sessions',
-      count: stats.activeSessions.toString(),
+      title: 'Total Revenue',
+      count: `₹${stats.totalRevenue}`,
       icon: TrendingUp,
       color: 'pink',
-      trend: 8
+      trend: 12
     }
   ];
 
@@ -103,21 +90,31 @@ function AdminDashboard() {
 
   return (
     <AdminLayout>
-      <div className="space-y-4 sm:space-y-6">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="space-y-4 sm:space-y-6"
+      >
         {/* Page Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+        >
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-slate-800 mb-1 sm:mb-2">Dashboard Overview</h1>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-800 mb-1 sm:mb-2">
+              Dashboard <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">Overview</span>
+            </h1>
             <p className="text-sm sm:text-base text-slate-600">Monitor your platform's performance and metrics</p>
           </div>
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-gradient-to-r from-primary-500 to-accent-500 text-white px-3 sm:px-4 py-2 rounded-lg sm:rounded-xl shadow-lg w-fit"
+            className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-3 sm:px-4 py-2 rounded-lg sm:rounded-xl shadow-lg w-fit"
           >
             <p className="text-xs sm:text-sm font-semibold whitespace-nowrap">Last updated: Just now</p>
           </motion.div>
-        </div>
+        </motion.div>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
@@ -140,22 +137,26 @@ function AdminDashboard() {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.4 }}
-            className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 border border-slate-200"
+            className="bg-white rounded-xl sm:rounded-2xl shadow-xl p-4 sm:p-6 border border-slate-100"
           >
             <h3 className="text-lg sm:text-xl font-bold text-slate-800 mb-3 sm:mb-4 flex items-center">
-              <GraduationCap className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-primary-600" />
-              Recent Teachers
+              <GraduationCap className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-purple-600" />
+              Top Rated Teachers
             </h3>
             <div className="space-y-2 sm:space-y-3">
-              {recentTeachers.length > 0 ? (
-                recentTeachers.map((teacher, index) => (
-                  <div key={teacher._id} className="flex items-center space-x-3 p-2 sm:p-3 bg-slate-50 rounded-lg sm:rounded-xl hover:bg-slate-100 transition-colors">
-                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-primary-400 to-accent-400 flex items-center justify-center flex-shrink-0">
+              {topTeachers.length > 0 ? (
+                topTeachers.map((teacher) => (
+                  <div key={teacher._id} className="flex items-center space-x-3 p-2 sm:p-3 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg sm:rounded-xl hover:shadow-md transition-all">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
                       <span className="text-white font-bold text-sm sm:text-base">{teacher.name.charAt(0)}</span>
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-slate-800 text-sm sm:text-base truncate">{teacher.name}</p>
                       <p className="text-xs text-slate-500 truncate">{teacher.subject}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-yellow-500 text-xs">⭐ {teacher.rating?.average?.toFixed(1) || 'N/A'}</span>
+                        <span className="text-slate-400 text-xs">• {teacher.notesCount} notes</span>
+                      </div>
                     </div>
                   </div>
                 ))
@@ -165,35 +166,60 @@ function AdminDashboard() {
             </div>
           </motion.div>
 
-          {/* Quick Actions */}
+          {/* Top Students Section */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.5 }}
-            className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 border border-slate-200"
+            className="bg-white rounded-xl sm:rounded-2xl shadow-xl p-4 sm:p-6 border border-slate-100"
           >
-            <h3 className="text-lg sm:text-xl font-bold text-slate-800 mb-3 sm:mb-4">Quick Actions</h3>
+            <h3 className="text-lg sm:text-xl font-bold text-slate-800 mb-3 sm:mb-4 flex items-center">
+              <Users className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-blue-600" />
+              Top Students
+            </h3>
             <div className="space-y-2 sm:space-y-3">
-              <motion.button
-                whileHover={{ scale: 1.02, x: 5 }}
-                whileTap={{ scale: 0.98 }}
-                className="w-full flex items-center space-x-2 sm:space-x-3 p-3 sm:p-4 bg-gradient-to-r from-primary-500 to-accent-500 text-white rounded-lg sm:rounded-xl shadow-lg hover:shadow-xl transition-all text-sm sm:text-base"
-              >
-                <Users className="w-5 h-5" />
-                <span className="font-semibold">Add New Teacher</span>
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.02, x: 5 }}
-                whileTap={{ scale: 0.98 }}
-                className="w-full flex items-center space-x-3 p-4 bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-xl shadow-lg hover:shadow-xl transition-all"
-              >
-                <FileText className="w-5 h-5" />
-                <span className="font-semibold">Upload Notes</span>
-              </motion.button>
+              {topStudents.length > 0 ? (
+                topStudents.map((student) => (
+                  <div key={student._id} className="flex items-center space-x-3 p-2 sm:p-3 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg sm:rounded-xl hover:shadow-md transition-all">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center flex-shrink-0">
+                      <span className="text-white font-bold text-sm sm:text-base">{student.name.charAt(0)}</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-slate-800 text-sm sm:text-base truncate">{student.name}</p>
+                      <p className="text-xs text-slate-500 truncate">{student.email}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-blue-600 text-xs font-medium">{student.purchasedNotes?.length || 0} purchases</span>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-slate-500 text-center py-4 text-sm">No students yet</p>
+              )}
             </div>
           </motion.div>
         </div>
-      </div>
+
+        {/* Quick Actions */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6 }}
+          className="bg-white rounded-xl sm:rounded-2xl shadow-xl p-4 sm:p-6 border border-slate-100 mt-6"
+        >
+          <h3 className="text-lg sm:text-xl font-bold text-slate-800 mb-3 sm:mb-4">Quick Stats</h3>
+          <div className="grid grid-cols-2 gap-3 sm:gap-4">
+            <div className="p-3 sm:p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200">
+              <p className="text-xs text-slate-600 mb-1">Active Students</p>
+              <p className="text-2xl sm:text-3xl font-bold text-blue-600">{stats.activeStudents}</p>
+            </div>
+            <div className="p-3 sm:p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-xl border border-green-200">
+              <p className="text-xs text-slate-600 mb-1">New This Week</p>
+              <p className="text-2xl sm:text-3xl font-bold text-green-600">{stats.newStudentsThisWeek}</p>
+            </div>
+          </div>
+        </motion.div>
+      </motion.div>
     </AdminLayout>
   );
 }

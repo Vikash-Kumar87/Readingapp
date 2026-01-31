@@ -2,36 +2,116 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Generate Icon</title>
+  <title>Generate PWA Icons from Logo</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    button {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin: 10px 5px;
+    }
+    button:hover {
+      background: #764ba2;
+    }
+    #preview {
+      margin-top: 20px;
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .preview-item {
+      text-align: center;
+    }
+    canvas {
+      border: 1px solid #ddd;
+      margin: 5px;
+    }
+  </style>
 </head>
 <body>
-  <canvas id="canvas" width="512" height="512"></canvas>
+  <h1>Generate PWA Icons from Logo</h1>
+  <p>This will generate PWA icons from public/logo.png</p>
+  
+  <div>
+    <button onclick="generateIcons()">Generate Icons</button>
+  </div>
+  
+  <div id="preview"></div>
+  
+  <canvas id="canvas512" width="512" height="512" style="display:none;"></canvas>
+  <canvas id="canvas192" width="192" height="192" style="display:none;"></canvas>
+  
   <script>
-    const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
+    function generateIcons() {
+      const img = new Image();
+      img.onload = function() {
+        // Generate 512x512 icon
+        const canvas512 = document.getElementById('canvas512');
+        const ctx512 = canvas512.getContext('2d');
+        ctx512.clearRect(0, 0, 512, 512);
+        ctx512.drawImage(img, 0, 0, 512, 512);
+        
+        // Generate 192x192 icon
+        const canvas192 = document.getElementById('canvas192');
+        const ctx192 = canvas192.getContext('2d');
+        ctx192.clearRect(0, 0, 192, 192);
+        ctx192.drawImage(img, 0, 0, 192, 192);
+        
+        // Show preview
+        const preview = document.getElementById('preview');
+        preview.innerHTML = `
+          <div class="preview-item">
+            <h3>512x512</h3>
+            <img src="${canvas512.toDataURL()}" width="192" height="192" style="border: 1px solid #ddd;">
+            <br>
+            <button onclick="download512()">Download 512x512</button>
+          </div>
+          <div class="preview-item">
+            <h3>192x192</h3>
+            <img src="${canvas192.toDataURL()}" width="192" height="192" style="border: 1px solid #ddd;">
+            <br>
+            <button onclick="download192()">Download 192x192</button>
+          </div>
+        `;
+      };
+      img.onerror = function() {
+        alert('Error loading logo.png. Make sure the file exists in public/logo.png');
+      };
+      img.src = '/logo.png';
+    }
     
-    // Background gradient
-    const gradient = ctx.createLinearGradient(0, 0, 512, 512);
-    gradient.addColorStop(0, '#667eea');
-    gradient.addColorStop(1, '#764ba2');
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, 512, 512);
+    function download512() {
+      const canvas = document.getElementById('canvas512');
+      canvas.toBlob(function(blob) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'pwa-512x512.png';
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+    }
     
-    // Add book icon
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 280px Arial';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('📚', 256, 256);
-    
-    // Download as PNG
-    canvas.toBlob(function(blob) {
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'pwa-512x512.png';
-      a.click();
-    });
+    function download192() {
+      const canvas = document.getElementById('canvas192');
+      canvas.toBlob(function(blob) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.download = 'pwa-192x192.png';
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+    }
   </script>
 </body>
 </html>

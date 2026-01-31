@@ -10,6 +10,7 @@ import Register from './pages/Register';
 import AdminDashboard from './pages/AdminDashboard';
 import ManageTeachers from './pages/ManageTeachers';
 import ManageNotes from './pages/ManageNotes';
+import ManageVideos from './pages/ManageVideos';
 import Settings from './pages/Settings';
 import AdminLayout from './layouts/AdminLayout';
 
@@ -106,6 +107,7 @@ function App() {
           <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
           <Route path="/admin/teachers" element={<AdminRoute><ManageTeachers /></AdminRoute>} />
           <Route path="/admin/notes" element={<AdminRoute><ManageNotes /></AdminRoute>} />
+          <Route path="/admin/videos" element={<AdminRoute><ManageVideos /></AdminRoute>} />
           <Route path="/admin/settings" element={<AdminRoute><Settings /></AdminRoute>} />
         </Routes>
       </AnimatePresence>

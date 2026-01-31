@@ -7,7 +7,8 @@ import {
   FileText, 
   BookOpen,
   X,
-  Settings
+  Settings,
+  Video
 } from 'lucide-react';
 
 /**
@@ -21,6 +22,7 @@ function Sidebar({ isOpen, setIsOpen }) {
     { name: 'Dashboard', path: '/admin', icon: LayoutDashboard },
     { name: 'Teachers', path: '/admin/teachers', icon: Users },
     { name: 'Notes', path: '/admin/notes', icon: FileText },
+    { name: 'Videos', path: '/admin/videos', icon: Video },
     { name: 'Settings', path: '/admin/settings', icon: Settings },
   ];
 

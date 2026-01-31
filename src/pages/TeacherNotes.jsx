@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { 
   Download, 
   Lock, 
@@ -21,6 +21,7 @@ import API_BASE_URL from '../config/api';
 function TeacherNotes() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [teacher, setTeacher] = useState(null);
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -28,6 +29,20 @@ function TeacherNotes() {
   const [selectedNote, setSelectedNote] = useState(null); // null = list view, object = note viewer
   const [currentPage, setCurrentPage] = useState(0);
   const [isReadOnly, setIsReadOnly] = useState(true);
+  const [activeTab, setActiveTab] = useState(location.state?.activeTab || 'notes'); // 'notes' or 'videos'
+
+  // Helper function to extract YouTube video ID
+  const getYouTubeVideoId = (url) => {
+    if (!url) return '';
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : url;
+  };
+  
+  // Filter notes with videos
+  const notesWithVideos = notes.filter(note => note.videoUrl);
+  const notesWithoutVideos = notes.filter(note => !note.videoUrl);
+  const allNotes = notes;
 
   useEffect(() => {
     fetchTeacherAndNotes();
@@ -39,6 +54,13 @@ function TeacherNotes() {
       const teacherResponse = await fetch(`${API_BASE_URL}/api/teachers/${id}`, {
         credentials: 'include'
       });
+      
+      if (teacherResponse.status === 401) {
+        localStorage.removeItem('user');
+        navigate('/login');
+        return;
+      }
+      
       const teacherData = await teacherResponse.json();
 
       if (!teacherResponse.ok || !teacherData.success) {
@@ -53,6 +75,13 @@ function TeacherNotes() {
       const notesResponse = await fetch(`${API_BASE_URL}/api/notes/teacher/${id}`, {
         credentials: 'include'
       });
+      
+      if (notesResponse.status === 401) {
+        localStorage.removeItem('user');
+        navigate('/login');
+        return;
+      }
+      
       const notesData = await notesResponse.json();
 
       if (notesResponse.ok && notesData.success) {
@@ -122,13 +151,13 @@ function TeacherNotes() {
 
   const closeNoteViewer = () => {
     setSelectedNote(null);
-    setCurrentPage(0);
   };
 
   // If a note is selected, show the viewer
   if (selectedNote) {
     return (
       <motion.div
+        key="note-viewer"
         initial="hidden"
         animate="visible"
         exit="exit"
@@ -179,7 +208,7 @@ function TeacherNotes() {
               onClick={closeNoteViewer}
               whileHover={{ scale: 1.05, x: -5 }}
               whileTap={{ scale: 0.95 }}
-              className="flex items-center space-x-1.5 sm:space-x-2 px-3 sm:px-4 py-2 bg-white/20 backdrop-blur-md rounded-lg sm:rounded-xl text-white hover:bg-white/30 transition-all border border-white/30 shadow-lg mb-3 sm:mb-4 text-sm sm:text-base"
+              className="flex items-center space-x-1.5 sm:space-x-2 px-3 sm:px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 backdrop-blur-md rounded-lg sm:rounded-xl text-white hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg mb-3 sm:mb-4 text-sm sm:text-base"
             >
               <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
               <span className="font-medium">Back to Notes List</span>
@@ -282,6 +311,51 @@ function TeacherNotes() {
                       />
                     </div>
                   )}
+                  
+                  {/* Video Section - Display if video URL exists */}
+                  {selectedNote.videoUrl && (
+                    <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-4 sm:p-6 border-t-2 border-purple-200">
+                      <div className="max-w-4xl mx-auto">
+                        <div className="flex items-center mb-4">
+                          <svg className="w-6 h-6 mr-2 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" />
+                          </svg>
+                          <h3 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-purple-700 to-pink-600 bg-clip-text text-transparent">
+                            Video Lecture
+                          </h3>
+                        </div>
+                        
+                        {selectedNote.videoType === 'youtube' ? (
+                          // YouTube Embed
+                          <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+                            <iframe
+                              className="absolute top-0 left-0 w-full h-full rounded-xl shadow-2xl"
+                              src={`https://www.youtube.com/embed/${getYouTubeVideoId(selectedNote.videoUrl)}?rel=0&modestbranding=1`}
+                              title="YouTube video player"
+                              frameBorder="0"
+                              sandbox="allow-same-origin allow-scripts allow-presentation"
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              allowFullScreen
+                            ></iframe>
+                          </div>
+                        ) : (
+                          // Direct Video File
+                          <video
+                            controls
+                            className="w-full rounded-xl shadow-2xl"
+                            controlsList="nodownload"
+                          >
+                            <source src={selectedNote.videoUrl} type={`video/${selectedNote.videoType}`} />
+                            Your browser does not support the video tag.
+                          </video>
+                        )}
+                        
+                        <p className="mt-3 text-xs sm:text-sm text-slate-600 text-center">
+                          Watch this video lecture to complement your notes
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ) : (
                 // Fallback if no file
@@ -302,6 +376,7 @@ function TeacherNotes() {
 
   return (
     <motion.div
+      key="notes-list"
       initial="hidden"
       animate="visible"
       exit="exit"
@@ -334,10 +409,13 @@ function TeacherNotes() {
                 <div className="absolute -inset-1 bg-gradient-to-r from-purple-500 via-pink-500 to-rose-500 rounded-full blur opacity-40 group-hover:opacity-60 transition-opacity"></div>
                 {teacher.profileImage ? (
                   <img
-                    src={`${API_BASE_URL}${teacher.profileImage}`}
+                    src={teacher.profileImage}
                     alt={teacher.name}
                     className="relative w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full object-cover border-4 border-white shadow-2xl ring-4 ring-purple-200 transform transition-transform"
                     style={{ transform: 'perspective(1000px) rotateY(-5deg)' }}
+                    onError={(e) => {
+                      console.error('Image load error for teacher:', teacher.name);
+                    }}
                   />
                 ) : (
                   <div className="relative w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-purple-500 via-pink-500 to-rose-500 flex items-center justify-center border-4 border-white shadow-2xl ring-4 ring-purple-200 transform" style={{ transform: 'perspective(1000px) rotateY(-5deg)' }}>
@@ -378,8 +456,20 @@ function TeacherNotes() {
                     className="flex items-center space-x-1.5 sm:space-x-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-pink-500 to-rose-500 rounded-full shadow-lg hover:shadow-xl transition-all border-2 border-white/30"
                   >
                     <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-                    <span className="font-semibold text-white text-sm sm:text-base">{notes.length} Notes Available</span>
+                    <span className="font-semibold text-white text-sm sm:text-base">{notesWithoutVideos.length} Notes Available</span>
                   </motion.div>
+                  
+                  {notesWithVideos.length > 0 && (
+                    <motion.div 
+                      whileHover={{ scale: 1.05, y: -2 }}
+                      className="flex items-center space-x-1.5 sm:space-x-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-purple-500 to-violet-600 rounded-full shadow-lg hover:shadow-xl transition-all border-2 border-white/30"
+                    >
+                      <svg className="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" />
+                      </svg>
+                      <span className="font-semibold text-white text-sm sm:text-base">{notesWithVideos.length} Videos Available</span>
+                    </motion.div>
+                  )}
                 </motion.div>
                 
                 {/* Enhanced Description */}
@@ -428,71 +518,174 @@ function TeacherNotes() {
           <div className="h-1.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
         </motion.div>
 
-        {/* Notes Viewer Section */}
+        {/* Notes/Videos Viewer Section with Tabs */}
         <motion.div
           variants={itemVariants}
           className="relative overflow-hidden bg-gradient-to-br from-white via-purple-50/40 to-pink-50/40 rounded-2xl sm:rounded-3xl shadow-2xl border-2 border-white/60 backdrop-blur-sm"
         >
-          {/* Notes List Header */}
+          {/* Tabs Header */}
           <div className="p-3 sm:p-4 md:p-6 border-b-2 border-purple-100 bg-gradient-to-r from-purple-50/50 to-pink-50/50">
-            <h2 className="text-base sm:text-lg md:text-xl font-semibold bg-gradient-to-r from-purple-700 to-pink-600 bg-clip-text text-transparent flex items-center space-x-2">
-              <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" />
-              <span className="truncate">{teacher.name}'s {teacher.subject} Notes</span>
-            </h2>
-          </div>
-
-          {/* Notes List */}
-          <div className="p-3 sm:p-4 md:p-6">
-            {notes.length === 0 ? (
-              <div className="text-center py-12 sm:py-16 md:py-20 px-4">
-                <FileText className="w-16 h-16 sm:w-20 sm:h-20 text-slate-300 mx-auto mb-4" />
-                <p className="text-slate-600 text-lg sm:text-xl font-semibold mb-2">No Notes Available Yet</p>
-                <p className="text-slate-500 text-sm sm:text-base">This teacher hasn't uploaded any notes yet. Check back soon!</p>
-                <button 
-                  onClick={() => navigate('/dashboard')}
-                  className="mt-6 px-4 sm:px-6 py-2 bg-indigo-600 text-white text-sm sm:text-base rounded-lg hover:bg-indigo-700 transition-colors"
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <h2 className="text-base sm:text-lg md:text-xl font-semibold bg-gradient-to-r from-purple-700 to-pink-600 bg-clip-text text-transparent flex items-center space-x-2">
+                <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" />
+                <span className="truncate">{teacher.name}'s {teacher.subject}</span>
+              </h2>
+              
+              {/* Tab Buttons */}
+              <div className="flex items-center gap-2 bg-white rounded-xl p-1 shadow-sm border border-purple-200">
+                <button
+                  onClick={() => setActiveTab('notes')}
+                  className={`flex items-center gap-2 px-4 sm:px-6 py-2 rounded-lg font-semibold transition-all ${
+                    activeTab === 'notes'
+                      ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
+                      : 'text-slate-600 hover:bg-slate-100'
+                  }`}
                 >
-                  Browse Other Teachers
+                  <FileText className="w-4 h-4" />
+                  <span className="text-sm sm:text-base">Notes ({notesWithoutVideos.length})</span>
+                </button>
+                <button
+                  onClick={() => setActiveTab('videos')}
+                  className={`flex items-center gap-2 px-4 sm:px-6 py-2 rounded-lg font-semibold transition-all ${
+                    activeTab === 'videos'
+                      ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
+                      : 'text-slate-600 hover:bg-slate-100'
+                  }`}
+                >
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" />
+                  </svg>
+                  <span className="text-sm sm:text-base">Videos ({notesWithVideos.length})</span>
                 </button>
               </div>
-            ) : (
-              <div className="space-y-2 sm:space-y-3">
-                {notes.map((note, index) => (
-                  <motion.div
-                    key={note._id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    onClick={() => openNote(note, index)}
-                    className="flex items-center bg-white/80 backdrop-blur-sm border-2 border-purple-100 rounded-lg sm:rounded-xl p-3 sm:p-4 hover:border-purple-300 hover:shadow-lg hover:bg-white transition-all cursor-pointer group"
+            </div>
+          </div>
+
+          {/* Content Area */}
+          <div className="p-3 sm:p-4 md:p-6">
+            {activeTab === 'notes' ? (
+              // Notes List (Only notes without videos)
+              notesWithoutVideos.length === 0 ? (
+                <div className="text-center py-12 sm:py-16 md:py-20 px-4">
+                  <FileText className="w-16 h-16 sm:w-20 sm:h-20 text-slate-300 mx-auto mb-4" />
+                  <p className="text-slate-600 text-lg sm:text-xl font-semibold mb-2">No Notes Available</p>
+                  <p className="text-slate-500 text-sm sm:text-base">This teacher hasn't uploaded any notes yet. Check back soon!</p>
+                  <button 
+                    onClick={() => navigate('/dashboard')}
+                    className="mt-6 px-4 sm:px-6 py-2 bg-indigo-600 text-white text-sm sm:text-base rounded-lg hover:bg-indigo-700 transition-colors"
                   >
-                    {/* Number Badge */}
-                    <div className={`flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-lg flex items-center justify-center font-bold text-white mr-2 sm:mr-3 md:mr-4 text-sm sm:text-base ${
-                      index % 9 === 0 ? 'bg-purple-500' :
-                      index % 9 === 1 ? 'bg-orange-500' :
-                      index % 9 === 2 ? 'bg-pink-500' :
-                      index % 9 === 3 ? 'bg-blue-900' :
-                      index % 9 === 4 ? 'bg-yellow-500' :
-                      index % 9 === 5 ? 'bg-green-500' :
-                      index % 9 === 6 ? 'bg-blue-500' :
-                      index % 9 === 7 ? 'bg-gray-800' :
-                      'bg-gray-500'
-                    }`}>
-                      {String(index + 1).padStart(2, '0')}
-                    </div>
+                    Browse Other Teachers
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-2 sm:space-y-3">
+                  {notesWithoutVideos.map((note, index) => (
+                    <motion.div
+                      key={note._id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      onClick={() => openNote(note, notes.indexOf(note))}
+                      className="flex items-center bg-white/80 backdrop-blur-sm border-2 border-purple-100 rounded-lg sm:rounded-xl p-3 sm:p-4 hover:border-purple-300 hover:shadow-lg hover:bg-white transition-all cursor-pointer group"
+                    >
+                      {/* Number Badge */}
+                      <div className={`flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-lg flex items-center justify-center font-bold text-white mr-2 sm:mr-3 md:mr-4 text-sm sm:text-base ${
+                        index % 9 === 0 ? 'bg-purple-500' :
+                        index % 9 === 1 ? 'bg-orange-500' :
+                        index % 9 === 2 ? 'bg-pink-500' :
+                        index % 9 === 3 ? 'bg-blue-900' :
+                        index % 9 === 4 ? 'bg-yellow-500' :
+                        index % 9 === 5 ? 'bg-green-500' :
+                        index % 9 === 6 ? 'bg-blue-500' :
+                        index % 9 === 7 ? 'bg-gray-800' :
+                        'bg-gray-500'
+                      }`}>
+                        {String(index + 1).padStart(2, '0')}
+                      </div>
 
-                    {/* Note Title */}
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-sm sm:text-base md:text-lg font-semibold text-slate-800 group-hover:text-indigo-600 transition-colors truncate">
-                        {note.title}
-                      </h3>
-                    </div>
+                      {/* Note Title */}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-sm sm:text-base md:text-lg font-semibold text-slate-800 group-hover:text-indigo-600 transition-colors truncate">
+                          {note.title}
+                        </h3>
+                        <p className="text-xs text-slate-500 mt-1">
+                          Click to read notes
+                        </p>
+                      </div>
 
-                    {/* Arrow Icon */}
-                    <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-slate-400 group-hover:text-indigo-600 transition-colors flex-shrink-0" />
-                  </motion.div>
-                ))}
-              </div>
+                      {/* Arrow Icon */}
+                      <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-slate-400 group-hover:text-indigo-600 transition-colors flex-shrink-0" />
+                    </motion.div>
+                  ))}
+                </div>
+              )
+            ) : (
+              // Videos List
+              notesWithVideos.length === 0 ? (
+                <div className="text-center py-12 sm:py-16 md:py-20 px-4">
+                  <svg className="w-16 h-16 sm:w-20 sm:h-20 text-slate-300 mx-auto mb-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" />
+                  </svg>
+                  <p className="text-slate-600 text-lg sm:text-xl font-semibold mb-2">No Videos Available Yet</p>
+                  <p className="text-slate-500 text-sm sm:text-base">This teacher hasn't uploaded any videos yet. Check back soon!</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                  {notesWithVideos.map((note, index) => (
+                    <motion.div
+                      key={note._id}
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: index * 0.05 }}
+                      className="bg-white/90 backdrop-blur-sm border-2 border-purple-200 rounded-xl overflow-hidden shadow-xl hover:shadow-2xl transition-all"
+                    >
+                      {/* Video Player */}
+                      <div className="relative bg-slate-900" style={{ paddingBottom: '56.25%' }}>
+                        {note.videoType === 'youtube' ? (
+                          <iframe
+                            className="absolute top-0 left-0 w-full h-full"
+                            src={`https://www.youtube.com/embed/${getYouTubeVideoId(note.videoUrl)}?rel=0&modestbranding=1`}
+                            title={note.title}
+                            frameBorder="0"
+                            sandbox="allow-same-origin allow-scripts allow-presentation"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                          ></iframe>
+                        ) : (
+                          <video
+                            controls
+                            className="absolute top-0 left-0 w-full h-full"
+                            controlsList="nodownload"
+                          >
+                            <source src={note.videoUrl} type={`video/${note.videoType}`} />
+                          </video>
+                        )}
+                      </div>
+
+                      {/* Video Info */}
+                      <div className="p-4">
+                        <h3 className="text-base sm:text-lg font-bold text-slate-800 mb-2 line-clamp-2">
+                          {note.title}
+                        </h3>
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-slate-500 flex items-center">
+                            <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                              <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" />
+                            </svg>
+                            {note.videoType === 'youtube' ? 'YouTube' : note.videoType?.toUpperCase()}
+                          </span>
+                          <button
+                            onClick={() => openNote(note, notes.indexOf(note))}
+                            className="px-3 py-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs font-semibold rounded-lg hover:shadow-lg transition-all"
+                          >
+                            View Notes
+                          </button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              )
             )}
           </div>
         </motion.div>
@@ -502,3 +695,4 @@ function TeacherNotes() {
 }
 
 export default TeacherNotes;
+

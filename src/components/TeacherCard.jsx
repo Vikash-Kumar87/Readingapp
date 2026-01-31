@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, User } from 'lucide-react';
+import { BookOpen, User, Video } from 'lucide-react';
 import API_BASE_URL from '../config/api';
 
 /**
@@ -25,6 +25,7 @@ const colorSchemes = [
  */
 function TeacherCard({ teacher }) {
   const navigate = useNavigate();
+  
   // Use _id from MongoDB instead of id
   const teacherIndex = teacher._id ? parseInt(teacher._id.slice(-2), 16) : 0;
   const colors = colorSchemes[teacherIndex % colorSchemes.length];
@@ -47,8 +48,7 @@ function TeacherCard({ teacher }) {
       variants={cardVariants}
       initial="rest"
       whileHover="hover"
-      className={`${colors.cardBg} cursor-pointer relative group rounded-3xl shadow-2xl overflow-hidden`}
-      onClick={() => navigate(`/teacher/${teacher._id}`)}
+      className={`${colors.cardBg} relative group rounded-3xl shadow-2xl overflow-hidden`}
     >
       {/* Gradient border effect */}
       <div className={`absolute inset-0 bg-gradient-to-br ${colors.border} rounded-3xl opacity-0 group-hover:opacity-30 blur-xl transition-opacity duration-500`} />
@@ -66,6 +66,9 @@ function TeacherCard({ teacher }) {
                 src={teacher.profileImage}
                 alt={teacher.name}
                 className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-glow"
+                onError={(e) => {
+                  console.error('Image load error for teacher:', teacher.name);
+                }}
               />
             ) : (
               <div className={`w-24 h-24 rounded-full bg-gradient-to-br ${colors.gradient} flex items-center justify-center border-4 border-white shadow-glow`}>
@@ -89,20 +92,42 @@ function TeacherCard({ teacher }) {
           <p className="text-sm font-semibold px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full inline-block text-white">
             {teacher.subject}
           </p>
-          <div className="flex items-center justify-center space-x-1 text-xs text-white/90 pt-2">
-            <BookOpen className="w-4 h-4 text-white" />
-            <span className="font-medium">{teacher.notesCount} Notes Available</span>
+          <div className="flex items-center justify-center gap-3 pt-2">
+            <div className="flex items-center space-x-1 text-xs text-white/90">
+              <BookOpen className="w-4 h-4 text-white" />
+              <span className="font-medium">{teacher.notesOnlyCount || 0} Notes</span>
+            </div>
+            {teacher.videosCount > 0 && (
+              <div className="flex items-center space-x-1 text-xs text-white/90">
+                <Video className="w-4 h-4 text-white" />
+                <span className="font-medium">{teacher.videosCount} Videos</span>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* View Notes Button */}
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className="mt-6 w-full px-6 py-3 bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white rounded-xl font-semibold shadow-lg transition-all duration-300 relative overflow-hidden border border-white/30"
-        >
-          <span className="relative z-10">View Notes</span>
-        </motion.button>
+        {/* View Buttons - Notes and Videos */}
+        <div className="mt-6 grid grid-cols-2 gap-3">
+          <motion.button
+            onClick={() => navigate(`/teacher/${teacher._id}`, { state: { activeTab: 'notes' } })}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="px-4 py-3 bg-blue-500/30 backdrop-blur-sm hover:bg-blue-500/40 text-white rounded-xl font-semibold shadow-lg transition-all duration-300 relative overflow-hidden border border-blue-400/30 flex items-center justify-center gap-2"
+          >
+            <BookOpen size={18} />
+            <span className="relative z-10">Notes</span>
+          </motion.button>
+
+          <motion.button
+            onClick={() => navigate(`/teacher/${teacher._id}`, { state: { activeTab: 'videos' } })}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="px-4 py-3 bg-purple-500/30 backdrop-blur-sm hover:bg-purple-500/40 text-white rounded-xl font-semibold shadow-lg transition-all duration-300 relative overflow-hidden border border-purple-400/30 flex items-center justify-center gap-2"
+          >
+            <Video size={18} />
+            <span className="relative z-10">Videos</span>
+          </motion.button>
+        </div>
       </div>
 
       {/* Decorative gradient overlay on hover */}

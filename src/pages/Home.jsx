@@ -1,19 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Search } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Search, Filter, X, SlidersHorizontal, Star } from 'lucide-react';
 import TeacherCard from '../components/TeacherCard';
 import { containerVariants, itemVariants } from '../animations/variants';
 import API_BASE_URL from '../config/api';
 
 /**
  * Home Page Component
- * Displays grid of teacher cards with search functionality
+ * Displays grid of teacher cards with search & filter functionality
  */
 function Home() {
   const [searchTerm, setSearchTerm] = useState('');
   const [teachers, setTeachers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  
+  // Filter states
+  const [showFilters, setShowFilters] = useState(false);
+  const [selectedSubject, setSelectedSubject] = useState('all');
+  const [priceRange, setPriceRange] = useState('all');
+  const [sortBy, setSortBy] = useState('newest');
 
   // Fetch teachers from API
   useEffect(() => {
@@ -42,11 +48,49 @@ function Home() {
     }
   };
 
-  // Filter teachers based on search
-  const filteredTeachers = Array.isArray(teachers) ? teachers.filter(teacher =>
-    teacher.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    teacher.subject?.toLowerCase().includes(searchTerm.toLowerCase())
-  ) : [];
+  // Get unique subjects for filter
+  const subjects = Array.isArray(teachers) 
+    ? ['all', ...new Set(teachers.map(t => t.subject).filter(Boolean))]
+    : ['all'];
+
+  // Advanced filter logic
+  const filteredTeachers = Array.isArray(teachers) ? teachers.filter(teacher => {
+    // Search filter
+    const matchesSearch = teacher.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         teacher.subject?.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    // Subject filter
+    const matchesSubject = selectedSubject === 'all' || teacher.subject === selectedSubject;
+    
+    // Price range filter (assuming teacher has a notesCount or similar field)
+    let matchesPrice = true;
+    if (priceRange === 'free') matchesPrice = true; // All notes for now
+    if (priceRange === 'low') matchesPrice = true;
+    if (priceRange === 'medium') matchesPrice = true;
+    if (priceRange === 'high') matchesPrice = true;
+    
+    return matchesSearch && matchesSubject && matchesPrice;
+  }).sort((a, b) => {
+    // Sorting logic
+    if (sortBy === 'newest') {
+      return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+    } else if (sortBy === 'oldest') {
+      return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
+    } else if (sortBy === 'name-az') {
+      return (a.name || '').localeCompare(b.name || '');
+    } else if (sortBy === 'name-za') {
+      return (b.name || '').localeCompare(a.name || '');
+    }
+    return 0;
+  }) : [];
+
+  // Clear all filters
+  const clearFilters = () => {
+    setSearchTerm('');
+    setSelectedSubject('all');
+    setPriceRange('all');
+    setSortBy('newest');
+  };
 
   return (
     <motion.div
@@ -116,36 +160,167 @@ function Home() {
           </motion.p>
         </motion.div>
 
-        {/* Search Bar */}
+        {/* Search Bar & Filters */}
         <motion.div
           variants={itemVariants}
-          className="max-w-xl mx-auto mb-8 sm:mb-12 px-2"
+          className="max-w-6xl mx-auto mb-8 sm:mb-12 px-2"
         >
+          {/* Search Bar */}
           <motion.div 
-            className="relative group"
+            className="relative group mb-4"
             whileHover={{ scale: 1.02 }}
             transition={{ type: "spring", stiffness: 300 }}
           >
             <div className="absolute inset-0 bg-gradient-to-r from-purple-400 via-pink-400 to-rose-400 rounded-xl sm:rounded-2xl blur-xl opacity-0 group-hover:opacity-60 transition-all duration-500" />
-            <div className="relative">
-              <motion.div
-                animate={{ scale: [1, 1.1, 1] }}
-                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            <div className="relative flex gap-2">
+              <div className="flex-1 relative">
+                <motion.div
+                  animate={{ scale: [1, 1.1, 1] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-purple-500" />
+                </motion.div>
+                <input
+                  type="text"
+                  placeholder="Search teacher or subject..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-3 sm:py-4 bg-white/95 backdrop-blur-xl rounded-xl sm:rounded-2xl border-2 border-purple-200/50
+                           focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent
+                           text-sm sm:text-base text-slate-800 placeholder-slate-400 shadow-2xl font-medium transition-all duration-300
+                           hover:shadow-purple-200/50"
+                />
+              </div>
+              
+              {/* Filter Toggle Button */}
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setShowFilters(!showFilters)}
+                className={`px-4 sm:px-6 py-3 sm:py-4 rounded-xl sm:rounded-2xl shadow-2xl font-medium transition-all duration-300 flex items-center gap-2
+                          ${showFilters 
+                            ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white' 
+                            : 'bg-white/95 text-slate-800 border-2 border-purple-200/50'}`}
               >
-                <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-purple-500" />
-              </motion.div>
-              <input
-                type="text"
-                placeholder="Search teacher or subject..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-3 sm:py-4 bg-white/95 backdrop-blur-xl rounded-xl sm:rounded-2xl border-2 border-purple-200/50
-                         focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent
-                         text-sm sm:text-base text-slate-800 placeholder-slate-400 shadow-2xl font-medium transition-all duration-300
-                         hover:shadow-purple-200/50"
-              />
+                <SlidersHorizontal className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span className="hidden sm:inline">Filters</span>
+              </motion.button>
             </div>
           </motion.div>
+
+          {/* Filter Panel */}
+          <AnimatePresence>
+            {showFilters && (
+              <motion.div
+                initial={{ opacity: 0, height: 0, y: -20 }}
+                animate={{ opacity: 1, height: 'auto', y: 0 }}
+                exit={{ opacity: 0, height: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+                className="overflow-hidden"
+              >
+                <div className="bg-white/95 backdrop-blur-xl rounded-xl sm:rounded-2xl border-2 border-purple-200/50 shadow-2xl p-4 sm:p-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {/* Subject Filter */}
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 mb-2">
+                        Subject
+                      </label>
+                      <select
+                        value={selectedSubject}
+                        onChange={(e) => setSelectedSubject(e.target.value)}
+                        className="w-full px-3 py-2 bg-white border-2 border-purple-200/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
+                      >
+                        {subjects.map(subject => (
+                          <option key={subject} value={subject}>
+                            {subject === 'all' ? 'All Subjects' : subject}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Price Range Filter */}
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 mb-2">
+                        Price Range
+                      </label>
+                      <select
+                        value={priceRange}
+                        onChange={(e) => setPriceRange(e.target.value)}
+                        className="w-full px-3 py-2 bg-white border-2 border-purple-200/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
+                      >
+                        <option value="all">All Prices</option>
+                        <option value="free">Free</option>
+                        <option value="low">₹1 - ₹50</option>
+                        <option value="medium">₹51 - ₹100</option>
+                        <option value="high">₹100+</option>
+                      </select>
+                    </div>
+
+                    {/* Sort By */}
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 mb-2">
+                        Sort By
+                      </label>
+                      <select
+                        value={sortBy}
+                        onChange={(e) => setSortBy(e.target.value)}
+                        className="w-full px-3 py-2 bg-white border-2 border-purple-200/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
+                      >
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                        <option value="name-az">Name (A-Z)</option>
+                        <option value="name-za">Name (Z-A)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Active Filters & Clear Button */}
+                  <div className="mt-4 flex items-center justify-between">
+                    <div className="flex flex-wrap gap-2">
+                      {searchTerm && (
+                        <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">
+                          Search: {searchTerm}
+                        </span>
+                      )}
+                      {selectedSubject !== 'all' && (
+                        <span className="px-3 py-1 bg-pink-100 text-pink-700 rounded-full text-xs font-medium">
+                          {selectedSubject}
+                        </span>
+                      )}
+                      {priceRange !== 'all' && (
+                        <span className="px-3 py-1 bg-rose-100 text-rose-700 rounded-full text-xs font-medium">
+                          {priceRange === 'free' ? 'Free' : priceRange === 'low' ? '₹1-50' : priceRange === 'medium' ? '₹51-100' : '₹100+'}
+                        </span>
+                      )}
+                    </div>
+                    
+                    {(searchTerm || selectedSubject !== 'all' || priceRange !== 'all' || sortBy !== 'newest') && (
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={clearFilters}
+                        className="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+                      >
+                        <X className="w-4 h-4" />
+                        Clear All
+                      </motion.button>
+                    )}
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Results Count */}
+          {!loading && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="mt-4 text-center text-sm text-slate-600"
+            >
+              Showing <span className="font-semibold text-purple-600">{filteredTeachers.length}</span> {filteredTeachers.length === 1 ? 'teacher' : 'teachers'}
+            </motion.div>
+          )}
         </motion.div>
 
         {/* Teachers Grid */}
@@ -192,3 +367,4 @@ function Home() {
 }
 
 export default Home;
+

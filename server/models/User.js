@@ -28,6 +28,10 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  profileImage: {
+    type: String,
+    default: null
+  },
   purchasedNotes: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Note'

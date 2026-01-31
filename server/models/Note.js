@@ -29,6 +29,15 @@ const noteSchema = new mongoose.Schema({
     enum: ['pdf', 'image'],
     default: 'image'
   },
+  videoUrl: {
+    type: String,
+    default: null
+  },
+  videoType: {
+    type: String,
+    enum: ['mp4', 'webm', 'youtube', null],
+    default: null
+  },
   price: {
     type: Number,
     default: 0,

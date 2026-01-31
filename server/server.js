@@ -10,6 +10,7 @@ const authRoutes = require('./routes/auth.routes');
 const adminRoutes = require('./routes/admin.routes');
 const teacherRoutes = require('./routes/teacher.routes');
 const noteRoutes = require('./routes/note.routes');
+const analyticsRoutes = require('./routes/analytics.routes');
 
 // Initialize express app
 const app = express();
@@ -69,10 +70,10 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: process.env.NODE_ENV === 'production', // HTTPS in production
+    secure: false, // Set to false for localhost development
     httpOnly: true,
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
+    sameSite: 'lax' // Changed to lax for localhost
   }
 }));
 
@@ -85,6 +86,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/teachers', teacherRoutes);
 app.use('/api/notes', noteRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 // Health check route
 app.get('/api/health', (req, res) => {

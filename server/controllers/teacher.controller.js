@@ -9,10 +9,26 @@ exports.getAllTeachers = async (req, res) => {
   try {
     const teachers = await Teacher.find().sort({ createdAt: -1 });
     
+    // Get notes count (with and without videos) for each teacher
+    const teachersWithCounts = await Promise.all(
+      teachers.map(async (teacher) => {
+        const allNotes = await Note.find({ teacher: teacher._id });
+        const notesWithoutVideos = allNotes.filter(note => !note.videoUrl);
+        const notesWithVideos = allNotes.filter(note => note.videoUrl);
+        
+        return {
+          ...teacher.toObject(),
+          totalNotesCount: allNotes.length,
+          notesOnlyCount: notesWithoutVideos.length,
+          videosCount: notesWithVideos.length
+        };
+      })
+    );
+    
     res.json({
       success: true,
-      count: teachers.length,
-      data: teachers
+      count: teachersWithCounts.length,
+      data: teachersWithCounts
     });
   } catch (error) {
     console.error('Get all teachers error:', error);

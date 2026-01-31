@@ -24,19 +24,17 @@ function ManageNotes() {
 
   const fetchData = async () => {
     try {
-      // Fetch teachers
-      const teachersRes = await fetch(`${API_BASE_URL}/api/teachers`, {
-        credentials: 'include'
-      });
+      // Fetch teachers and notes in parallel for faster loading
+      const [teachersRes, notesRes] = await Promise.all([
+        fetch(`${API_BASE_URL}/api/teachers`, { credentials: 'include' }),
+        fetch(`${API_BASE_URL}/api/notes`, { credentials: 'include' })
+      ]);
+      
       const teachersData = await teachersRes.json();
       if (teachersData.success) {
         setTeachers(teachersData.data || []);
       }
 
-      // Fetch all notes
-      const notesRes = await fetch(`${API_BASE_URL}/api/notes`, {
-        credentials: 'include'
-      });
       const notesData = await notesRes.json();
       if (notesData.success) {
         setNotesList(notesData.data || []);
@@ -312,6 +310,9 @@ function ManageNotes() {
                     Type
                   </th>
                   <th className="px-6 py-4 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                    Video
+                  </th>
+                  <th className="px-6 py-4 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
@@ -355,6 +356,20 @@ function ManageNotes() {
                             {note.fileType || 'image'}
                           </span>
                         </td>
+                        <td className="px-6 py-4 text-center">
+                          {note.videoUrl ? (
+                            <div className="flex items-center justify-center">
+                              <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-semibold flex items-center">
+                                <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                  <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" />
+                                </svg>
+                                {note.videoType || 'Video'}
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="text-slate-400 text-xs">No video</span>
+                          )}
+                        </td>
                         <td className="px-6 py-4">
                           <div className="flex items-center justify-center space-x-2">
                             <motion.button
@@ -389,7 +404,7 @@ function ManageNotes() {
                   })
                 ) : (
                   <tr>
-                    <td colSpan="5" className="px-6 py-12 text-center text-slate-500">
+                    <td colSpan="6" className="px-6 py-12 text-center text-slate-500">
                       <div className="flex flex-col items-center">
                         <File className="w-12 h-12 text-slate-300 mb-3" />
                         <p className="text-lg font-medium">No notes found</p>

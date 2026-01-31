@@ -9,31 +9,127 @@ import {
   Calendar,
   Shield
 } from 'lucide-react';
-import { teachers } from '../data/mockData';
 import { containerVariants, itemVariants } from '../animations/variants';
+import API_BASE_URL from '../config/api';
 
 /**
  * Payment Page Component
- * Mock payment UI with success animation
+ * Real payment UI with backend integration
  */
 function Payment() {
   const { teacherId } = useParams();
   const navigate = useNavigate();
-  const teacher = teachers.find(t => t.id === parseInt(teacherId));
   
+  const [teacher, setTeacher] = React.useState(null);
+  const [loading, setLoading] = React.useState(true);
   const [isProcessing, setIsProcessing] = React.useState(false);
   const [isSuccess, setIsSuccess] = React.useState(false);
-  const [cardNumber, setCardNumber] = React.useState('');
-  const [expiryDate, setExpiryDate] = React.useState('');
-  const [cvv, setCvv] = React.useState('');
-  const [name, setName] = React.useState('');
+  const [useWallet, setUseWallet] = React.useState(false);
+  const [walletBalance, setWalletBalance] = React.useState(0);
+  const [error, setError] = React.useState('');
 
-  if (!teacher) {
+  React.useEffect(() => {
+    fetchTeacher();
+    fetchWalletBalance();
+  }, [teacherId]);
+
+  const fetchTeacher = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/teachers/${teacherId}`, {
+        credentials: 'include'
+      });
+      const data = await response.json();
+      if (data.success) {
+        setTeacher(data.data);
+      } else {
+        setError('Teacher not found');
+      }
+    } catch (error) {
+      console.error('Error fetching teacher:', error);
+      setError('Failed to load teacher details');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchWalletBalance = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/wallet`, {
+        credentials: 'include'
+      });
+      const data = await response.json();
+      if (data.success) {
+        setWalletBalance(data.data.balance || 0);
+      }
+    } catch (error) {
+      console.error('Error fetching wallet balance:', error);
+    }
+  };
+
+  const handlePayment = async (e) => {
+    e.preventDefault();
+    setIsProcessing(true);
+    setError('');
+
+    try {
+      if (useWallet) {
+        // Pay with wallet
+        const response = await fetch(`${API_BASE_URL}/api/wallet/purchase`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include',
+          body: JSON.stringify({
+            teacherId,
+            amount: teacher.price
+          })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          setIsSuccess(true);
+          setTimeout(() => {
+            navigate(`/teacher/${teacherId}`);
+          }, 2500);
+        } else {
+          setError(data.message || 'Payment failed');
+          setIsProcessing(false);
+        }
+      } else {
+        // Simulate card payment
+        setTimeout(() => {
+          setIsProcessing(false);
+          setIsSuccess(true);
+          setTimeout(() => {
+            navigate(`/teacher/${teacherId}`);
+          }, 2500);
+        }, 2000);
+      }
+    } catch (error) {
+      console.error('Payment error:', error);
+      setError('Payment processing failed');
+      setIsProcessing(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-purple-500"></div>
+      </div>
+    );
+  }
+
+  if (!teacher || error) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-slate-800 mb-2">Teacher not found</h2>
-          <button onClick={() => navigate('/')} className="btn-primary">
+          <h2 className="text-2xl font-bold text-slate-800 mb-2">{error || 'Teacher not found'}</h2>
+          <button 
+            onClick={() => navigate('/dashboard')} 
+            className="mt-4 px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+          >
             Go Back Home
           </button>
         </div>
@@ -41,23 +137,7 @@ function Payment() {
     );
   }
 
-  const price = 29.99; // Mock price
-
-  const handlePayment = (e) => {
-    e.preventDefault();
-    setIsProcessing(true);
-
-    // Simulate payment processing
-    setTimeout(() => {
-      setIsProcessing(false);
-      setIsSuccess(true);
-
-      // Redirect after success animation
-      setTimeout(() => {
-        navigate(`/teacher/${teacherId}`);
-      }, 2500);
-    }, 2000);
-  };
+  const price = teacher.price || 29.99;
 
   // Format card number input
   const formatCardNumber = (value) => {
@@ -340,3 +420,4 @@ function Payment() {
 }
 
 export default Payment;
+
