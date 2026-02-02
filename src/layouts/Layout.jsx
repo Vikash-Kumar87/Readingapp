@@ -199,8 +199,8 @@ function Layout({ children }) {
               <div className="space-y-2 text-sm">
                 <div className="flex items-center justify-center md:justify-start space-x-2">
                   <span className="text-lg">📧</span>
-                  <a href="mailto:vikashkr30112003@gmail.com" className="text-white/90 hover:text-white transition-colors truncate max-w-[200px]">
-                    vikashkr30112003@gmail.com
+                  <a href="mailto:randhir15401@gmail.com" className="text-white/90 hover:text-white transition-colors truncate max-w-[200px]">
+                    randhir15401@gmail.com
                   </a>
                 </div>
                 <div className="flex items-center justify-center md:justify-start space-x-2">
